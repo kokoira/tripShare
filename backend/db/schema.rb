@@ -11,7 +11,7 @@
 # It's strongly recommended that you check this file into your version control system.
 
 ActiveRecord::Schema[7.2].define(version: 2025_01_01_000008) do
-  create_table "comments", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "comments", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.bigint "post_id", null: false
     t.bigint "user_id", null: false
     t.text "body", null: false
@@ -21,7 +21,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_01_01_000008) do
     t.index ["user_id"], name: "idx_comments_user_id"
   end
 
-  create_table "follows", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "follows", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.bigint "follower_id", null: false
     t.bigint "followed_id", null: false
     t.datetime "created_at", null: false
@@ -31,7 +31,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_01_01_000008) do
     t.index ["follower_id", "followed_id"], name: "idx_follows_follower_followed", unique: true
   end
 
-  create_table "likes", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "likes", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.bigint "post_id", null: false
     t.bigint "user_id", null: false
     t.datetime "created_at", null: false
@@ -39,14 +39,14 @@ ActiveRecord::Schema[7.2].define(version: 2025_01_01_000008) do
     t.index ["user_id"], name: "idx_likes_user_id"
   end
 
-  create_table "login_attempts", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "login_attempts", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.string "email", null: false
     t.datetime "attempted_at", null: false
     t.boolean "success", null: false
     t.index ["email", "attempted_at"], name: "idx_login_attempts_email_time"
   end
 
-  create_table "post_images", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "post_images", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.bigint "post_id", null: false
     t.string "image_key", null: false
     t.string "thumbnail_key"
@@ -55,7 +55,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_01_01_000008) do
     t.index ["post_id"], name: "idx_post_images_post_id"
   end
 
-  create_table "posts", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "posts", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.text "body", null: false
     t.integer "comments_count", default: 0, null: false
@@ -66,7 +66,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_01_01_000008) do
     t.index ["user_id"], name: "idx_posts_user_id"
   end
 
-  create_table "sessions", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "sessions", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.string "session_token", null: false
     t.datetime "expires_at", null: false
@@ -76,7 +76,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_01_01_000008) do
     t.index ["user_id"], name: "idx_sessions_user_id"
   end
 
-  create_table "users", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "users", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.string "email", null: false
     t.string "username", null: false
     t.string "password_digest", null: false

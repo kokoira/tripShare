@@ -4,7 +4,159 @@ info:
   title: TripShare API
   version: v1
   description: 旅行記録SNSアプリ TripShare のAPI仕様書
-paths: {}
+paths:
+  "/api/v1/auth/register":
+    post:
+      summary: ユーザー登録
+      tags:
+      - Auth
+      description: メールアドレス・パスワード・ユーザー名でアカウントを作成する
+      parameters: []
+      responses:
+        '201':
+          description: ユーザー登録成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    "$ref": "#/components/schemas/User"
+                  token:
+                    type: string
+                required:
+                - user
+        '400':
+          description: ユーザー名が既に使用済み
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ValidationError"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: test@example.com
+                password:
+                  type: string
+                  example: password123
+                username:
+                  type: string
+                  example: testuser
+              required:
+              - email
+              - password
+              - username
+  "/api/v1/auth/login":
+    post:
+      summary: ログイン
+      tags:
+      - Auth
+      description: 正しいメールアドレスとパスワードでログインしてセッションを開始する
+      parameters: []
+      responses:
+        '200':
+          description: ログイン成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    "$ref": "#/components/schemas/User"
+                required:
+                - user
+        '401':
+          description: メールアドレスが存在しない
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ApiError"
+        '400':
+          description: パスワードが72文字超（bcryptの切り捨て対策、ログイン試行なし）
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ValidationError"
+        '429':
+          description: 5分間に10回ログイン失敗でアカウントロック
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  retry_after:
+                    type: integer
+                required:
+                - error
+                - retry_after
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: user@example.com
+                password:
+                  type: string
+                  example: password123
+              required:
+              - email
+              - password
+  "/api/v1/auth/logout":
+    delete:
+      summary: ログアウト
+      tags:
+      - Auth
+      description: セッションを破棄してログアウトする
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          description: 未認証状態でのログアウトも200を返す
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                required:
+                - message
+  "/api/v1/auth/me":
+    get:
+      summary: 現在のユーザー情報取得
+      tags:
+      - Auth
+      description: 認証済みユーザーの情報を返す
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          description: 認証済みの場合はユーザー情報を返す
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    "$ref": "#/components/schemas/User"
+                required:
+                - user
+        '401':
+          description: セッションが期限切れの場合は401を返す（Requirement 2.6）
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ApiError"
 servers:
 - url: http://{defaultHost}
   variables:

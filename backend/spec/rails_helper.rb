@@ -1,6 +1,8 @@
 # このファイルは `rails generate rspec:install` で生成され、プロジェクト用に拡張されている
 require 'spec_helper'
-ENV['RAILS_ENV'] ||= 'test'
+# RSpec実行時は常にtest環境を使用する
+# コンテナ環境変数でRAILS_ENVが設定されていても、テスト実行には必ずtest環境を使う
+ENV['RAILS_ENV'] = 'test'
 require_relative '../config/environment'
 # 本番環境でのテスト実行を防止
 abort("The Rails environment is running in production mode!") if Rails.env.production?

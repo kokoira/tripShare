@@ -5,6 +5,9 @@ Rails.application.configure do
   config.enable_reloading = false
   config.eager_load = false
 
+  # テスト用ホストを許可（RSpec リクエストスペックが www.example.com を使用する）
+  config.hosts = nil
+
   # 警告は表示しない
   config.action_dispatch.show_exceptions = :none
 
