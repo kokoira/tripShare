@@ -7,8 +7,10 @@ Rails.application.configure do
   # ログに追加するカスタムフィールド
   config.lograge.custom_options = lambda do |event|
     options = {
-      request_id: event.payload[:request_id],
-      ip:         event.payload[:ip],
+      timestamp:   Time.current.iso8601(3),
+      request_id:  event.payload[:request_id],
+      ip:          event.payload[:ip],
+      duration_ms: event.duration.round(2)
     }
 
     # 認証済みユーザーの ID を含める
@@ -16,7 +18,7 @@ Rails.application.configure do
 
     # エラー情報を含める
     if event.payload[:exception]
-      options[:error]       = event.payload[:exception].first
+      options[:error]         = event.payload[:exception].first
       options[:error_message] = event.payload[:exception].last
     end
 

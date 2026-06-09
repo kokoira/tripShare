@@ -58,3 +58,7 @@ group :test do
   # rswag（Swagger ドキュメント自動生成）
   gem 'rswag-specs'
 end
+
+# Swagger UI/API（全環境）
+gem 'rswag-api', '~> 2.13'
+gem 'rswag-ui', '~> 2.13'
