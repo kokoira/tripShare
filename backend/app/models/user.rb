@@ -2,30 +2,42 @@ class User < ApplicationRecord
   # パスワードハッシュ化（bcrypt）
   has_secure_password
 
-  # アソシエーション（タスク 1.3 でマイグレーション作成後に有効化）
-  # has_many :sessions, dependent: :destroy
-  # has_many :posts, dependent: :destroy
-  # has_many :comments, dependent: :destroy
-  # has_many :likes, dependent: :destroy
-  # has_many :follows_as_follower, class_name: 'Follow', foreign_key: :follower_id, dependent: :destroy
-  # has_many :follows_as_followed, class_name: 'Follow', foreign_key: :followed_id, dependent: :destroy
-  # has_many :following, through: :follows_as_follower, source: :followed
-  # has_many :followers, through: :follows_as_followed, source: :follower
+  # アソシエーション
+  has_many :sessions,     dependent: :destroy
+  has_many :posts,        dependent: :destroy
+  has_many :comments,     dependent: :destroy
+  has_many :likes,        dependent: :destroy
+  has_many :post_images,  through: :posts
+
+  has_many :active_follows,
+           class_name:  'Follow',
+           foreign_key: :follower_id,
+           dependent:   :destroy,
+           inverse_of:  :follower
+
+  has_many :passive_follows,
+           class_name:  'Follow',
+           foreign_key: :followed_id,
+           dependent:   :destroy,
+           inverse_of:  :followed
+
+  has_many :following, through: :active_follows,  source: :followed
+  has_many :followers, through: :passive_follows, source: :follower
 
   # バリデーション
   validates :email,
-            presence: true,
+            presence:   true,
             uniqueness: { case_sensitive: false },
-            format: { with: URI::MailTo::EMAIL_REGEXP }
+            format:     { with: URI::MailTo::EMAIL_REGEXP }
 
   validates :username,
-            presence: true,
+            presence:   true,
             uniqueness: true,
-            length: { maximum: 255 }
+            length:     { maximum: 50 }
 
   validates :password,
             length: { minimum: 8, maximum: 128 },
-            if: :password_required?
+            if:     :password_required?
 
   # メールアドレスを小文字に正規化
   before_validation :normalize_email
