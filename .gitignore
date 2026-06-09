@@ -1,0 +1,19 @@
+# 環境変数（シークレット）
+.env
+.env.local
+.env.*.local
+
+# Rails シークレット
+backend/config/master.key
+backend/config/credentials/*.key
+
+# macOS
+.DS_Store
+
+# IDE
+.idea/
+*.swp
+*.swo
+
+# k6 テスト結果
+k6/results.json

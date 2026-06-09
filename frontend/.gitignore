@@ -1,0 +1,34 @@
+# 依存関係
+/node_modules
+/.pnp
+.pnp.js
+.yarn/install-state.gz
+
+# テスト
+/coverage
+
+# Next.js
+/.next/
+/out/
+
+# 本番ビルド
+/build
+
+# その他
+.DS_Store
+*.pem
+
+# デバッグ
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ローカル環境変数
+.env*.local
+
+# Vercel
+.vercel
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts

@@ -1,0 +1,1509 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TripShare - 旅行記録SNS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --primary: #0EA5E9;
+  --primary-dark: #0284C7;
+  --primary-light: #E0F2FE;
+  --accent: #F59E0B;
+  --like: #EF4444;
+  --like-light: #FEF2F2;
+  --success: #22C55E;
+  --bg: #F1F5F9;
+  --surface: #FFFFFF;
+  --sidebar: #0F172A;
+  --sidebar-hover: #1E293B;
+  --text: #1E293B;
+  --text-muted: #64748B;
+  --text-light: #94A3B8;
+  --border: #E2E8F0;
+  --radius: 16px;
+  --radius-sm: 8px;
+  --radius-full: 9999px;
+  --shadow: 0 1px 3px rgba(0,0,0,.1),0 1px 2px rgba(0,0,0,.06);
+  --shadow-md: 0 4px 6px rgba(0,0,0,.07),0 2px 4px rgba(0,0,0,.06);
+  --shadow-lg: 0 10px 25px rgba(0,0,0,.1),0 4px 10px rgba(0,0,0,.05);
+  --font: 'Inter','Noto Sans JP',system-ui,sans-serif;
+  --sidebar-w: 260px;
+  --right-w: 300px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{font-size:15px;scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6}
+a{color:inherit;text-decoration:none}
+button{cursor:pointer;font-family:var(--font)}
+img{max-width:100%;display:block}
+textarea,input{font-family:var(--font)}
+
+/* ── Auth Layout ─────────────────────────────── */
+.auth-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,#0c4a6e 0%,#0EA5E9 50%,#38bdf8 100%);
+  padding:24px}
+.auth-card{background:rgba(255,255,255,.97);backdrop-filter:blur(20px);
+  border-radius:24px;padding:48px 40px;width:100%;max-width:420px;
+  box-shadow:0 25px 50px rgba(0,0,0,.25)}
+.auth-logo{display:flex;align-items:center;gap:10px;margin-bottom:32px;justify-content:center}
+.auth-logo svg{width:36px;height:36px;color:var(--primary)}
+.auth-logo-text{font-size:1.6rem;font-weight:700;color:var(--text)}
+.auth-logo-text span{color:var(--primary)}
+.auth-title{font-size:1.4rem;font-weight:700;margin-bottom:6px;text-align:center}
+.auth-subtitle{color:var(--text-muted);font-size:.9rem;text-align:center;margin-bottom:28px}
+.auth-demo{background:var(--primary-light);border-radius:var(--radius-sm);padding:12px 16px;
+  margin-bottom:20px;font-size:.82rem;color:var(--primary-dark)}
+.auth-demo b{display:block;margin-bottom:2px}
+
+/* ── Form Elements ───────────────────────────── */
+.field{margin-bottom:16px}
+.field label{display:block;font-size:.85rem;font-weight:600;color:var(--text);margin-bottom:6px}
+.field input{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);
+  font-size:.95rem;transition:border-color .15s,box-shadow .15s;outline:none;background:var(--surface)}
+.field input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(14,165,233,.15)}
+.field-error{font-size:.8rem;color:var(--like);margin-top:4px;display:none}
+.field.has-error input{border-color:var(--like)}
+.field.has-error .field-error{display:block}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  padding:11px 20px;border-radius:var(--radius-full);font-size:.9rem;font-weight:600;
+  border:none;transition:all .15s;white-space:nowrap}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:hover{background:var(--primary-dark);transform:translateY(-1px);box-shadow:var(--shadow-md)}
+.btn-primary:active{transform:translateY(0)}
+.btn-full{width:100%;padding:13px}
+.btn-outline{background:transparent;color:var(--primary);border:1.5px solid var(--primary)}
+.btn-outline:hover{background:var(--primary-light)}
+.btn-ghost{background:transparent;color:var(--text-muted);border:none}
+.btn-ghost:hover{background:var(--bg);color:var(--text)}
+.btn-danger{background:var(--like);color:#fff}
+.btn-danger:hover{background:#dc2626}
+.btn-sm{padding:7px 14px;font-size:.82rem}
+.btn-icon{padding:8px;border-radius:var(--radius-full);background:transparent;border:none;
+  color:var(--text-muted);transition:all .15s;display:inline-flex;align-items:center;justify-content:center}
+.btn-icon:hover{background:var(--bg)}
+.btn-icon svg{width:18px;height:18px}
+
+.auth-link{text-align:center;margin-top:20px;font-size:.88rem;color:var(--text-muted)}
+.auth-link button{background:none;border:none;color:var(--primary);font-weight:600;cursor:pointer}
+.auth-link button:hover{text-decoration:underline}
+
+/* ── App Layout ──────────────────────────────── */
+.app-layout{display:flex;min-height:100vh;max-width:1280px;margin:0 auto}
+.sidebar{width:var(--sidebar-w);background:var(--sidebar);position:fixed;top:0;left:0;
+  bottom:0;display:flex;flex-direction:column;padding:20px 16px;z-index:100;
+  max-width:var(--sidebar-w)}
+.sidebar-logo{display:flex;align-items:center;gap:10px;padding:12px 16px;margin-bottom:8px}
+.sidebar-logo svg{width:28px;height:28px;color:var(--primary)}
+.sidebar-logo-text{font-size:1.2rem;font-weight:700;color:#fff}
+.sidebar-logo-text span{color:var(--primary)}
+.nav-list{list-style:none;flex:1}
+.nav-item{width:100%;display:flex;align-items:center;gap:12px;padding:13px 16px;
+  border-radius:var(--radius-sm);background:transparent;border:none;color:#CBD5E1;
+  font-size:.95rem;font-weight:500;transition:all .15s;text-align:left;cursor:pointer}
+.nav-item:hover,.nav-item.active{background:var(--sidebar-hover);color:#fff}
+.nav-item svg{width:20px;height:20px;flex-shrink:0}
+.btn-compose{width:100%;background:var(--primary);color:#fff;border:none;border-radius:var(--radius-full);
+  padding:13px;font-size:.95rem;font-weight:700;margin-top:16px;cursor:pointer;transition:all .15s}
+.btn-compose:hover{background:var(--primary-dark);transform:translateY(-1px)}
+.sidebar-user{display:flex;align-items:center;gap:10px;padding:14px 16px;border-radius:var(--radius-sm);
+  cursor:pointer;transition:background .15s;margin-top:auto}
+.sidebar-user:hover{background:var(--sidebar-hover)}
+.sidebar-user-info{flex:1;min-width:0}
+.sidebar-user-name{font-size:.88rem;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sidebar-user-handle{font-size:.78rem;color:#64748B;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.logout-btn{background:none;border:none;color:#64748B;cursor:pointer;padding:4px;border-radius:4px;display:flex}
+.logout-btn:hover{color:#94A3B8}
+.logout-btn svg{width:16px;height:16px}
+
+.main-content{margin-left:var(--sidebar-w);margin-right:var(--right-w);flex:1;min-width:0;
+  max-width:640px;padding:0}
+.right-panel{width:var(--right-w);position:fixed;top:0;right:0;bottom:0;
+  padding:20px 16px;overflow-y:auto;border-left:1px solid var(--border);background:var(--surface)}
+
+/* ── Page Header ─────────────────────────────── */
+.page-header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.92);
+  backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:16px 20px;
+  display:flex;align-items:center;gap:12px}
+.page-header h1{font-size:1.1rem;font-weight:700}
+.back-btn{background:none;border:none;cursor:pointer;padding:6px;border-radius:var(--radius-full);
+  color:var(--text);display:flex;align-items:center;transition:background .15s}
+.back-btn:hover{background:var(--bg)}
+.back-btn svg{width:20px;height:20px}
+.tab-bar{display:flex;border-bottom:1px solid var(--border)}
+.tab{flex:1;padding:14px;text-align:center;font-size:.9rem;font-weight:600;
+  color:var(--text-muted);background:none;border:none;cursor:pointer;
+  border-bottom:2px solid transparent;transition:all .15s;margin-bottom:-1px}
+.tab.active{color:var(--primary);border-bottom-color:var(--primary)}
+
+/* ── Compose ─────────────────────────────────── */
+.compose-box{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 20px}
+.compose-inner{display:flex;gap:12px}
+.compose-textarea{width:100%;border:none;outline:none;resize:none;font-size:.98rem;
+  line-height:1.5;padding:8px 0;color:var(--text);background:transparent;min-height:64px}
+.compose-textarea::placeholder{color:var(--text-light)}
+.compose-footer{display:flex;align-items:center;gap:8px;margin-top:8px;padding-top:12px;
+  border-top:1px solid var(--border)}
+.char-count{font-size:.82rem;color:var(--text-muted);margin-left:auto}
+.char-count.warn{color:var(--accent)}
+.char-count.over{color:var(--like)}
+.image-preview-list{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.image-preview-item{position:relative;width:80px;height:80px;border-radius:var(--radius-sm);overflow:hidden}
+.image-preview-item img{width:100%;height:100%;object-fit:cover}
+.image-preview-remove{position:absolute;top:2px;right:2px;background:rgba(0,0,0,.6);
+  color:#fff;border:none;border-radius:var(--radius-full);width:20px;height:20px;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:10px}
+#image-input{display:none}
+
+/* ── Post Card ───────────────────────────────── */
+.post-card{background:var(--surface);border-bottom:1px solid var(--border);
+  padding:16px 20px;transition:background .1s;cursor:pointer}
+.post-card:hover{background:#FAFBFC}
+.post-header{display:flex;align-items:flex-start;gap:12px;margin-bottom:10px}
+.post-meta{flex:1;min-width:0}
+.post-author{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap}
+.author-name{font-weight:700;font-size:.95rem;color:var(--text)}
+.author-handle{font-size:.85rem;color:var(--text-muted)}
+.post-time{font-size:.82rem;color:var(--text-light)}
+.post-body{font-size:.97rem;line-height:1.65;margin-bottom:12px;word-break:break-word;
+  white-space:pre-wrap}
+.post-expand{background:none;border:none;color:var(--primary);cursor:pointer;
+  font-size:.88rem;font-weight:500;padding:0;margin-top:2px}
+
+/* ── Image Grid ──────────────────────────────── */
+.img-grid{border-radius:var(--radius-sm);overflow:hidden;margin-bottom:12px;
+  display:grid;gap:2px;max-height:420px}
+.img-grid.n1{grid-template-columns:1fr}
+.img-grid.n2{grid-template-columns:1fr 1fr}
+.img-grid.n3{grid-template-columns:1fr 1fr;grid-template-rows:auto auto}
+.img-grid.n4{grid-template-columns:1fr 1fr}
+.img-grid.n3 .img-cell:first-child{grid-row:1/3}
+.img-cell{overflow:hidden;cursor:pointer;position:relative;background:#E2E8F0}
+.img-cell img{width:100%;height:100%;object-fit:cover;min-height:160px;max-height:300px;
+  display:block;transition:transform .2s}
+.img-cell:hover img{transform:scale(1.02)}
+.img-grid.n1 .img-cell img{max-height:420px;min-height:200px}
+
+/* ── Post Actions ────────────────────────────── */
+.post-actions{display:flex;gap:4px;margin-top:4px}
+.action-btn{display:flex;align-items:center;gap:5px;padding:7px 12px;border-radius:var(--radius-full);
+  background:none;border:none;color:var(--text-muted);font-size:.85rem;font-weight:500;
+  cursor:pointer;transition:all .15s}
+.action-btn:hover{background:var(--primary-light);color:var(--primary)}
+.action-btn svg{width:17px;height:17px;flex-shrink:0}
+.action-btn.liked{color:var(--like)}
+.action-btn.liked:hover{background:var(--like-light)}
+.action-btn.liked svg{fill:var(--like);stroke:var(--like)}
+.action-btn .like-icon{transition:transform .2s}
+.action-btn.liked .like-icon{animation:heartpop .25s ease}
+@keyframes heartpop{0%{transform:scale(1)}50%{transform:scale(1.4)}100%{transform:scale(1)}}
+.post-more{margin-left:auto}
+
+/* ── Avatar ──────────────────────────────────── */
+.avatar{width:44px;height:44px;border-radius:var(--radius-full);
+  display:flex;align-items:center;justify-content:center;font-weight:700;
+  font-size:1.1rem;color:#fff;flex-shrink:0}
+.avatar.sm{width:32px;height:32px;font-size:.82rem}
+.avatar.lg{width:72px;height:72px;font-size:1.8rem}
+.avatar.xl{width:88px;height:88px;font-size:2.2rem}
+
+/* ── Comments ────────────────────────────────── */
+.comment-card{display:flex;gap:10px;padding:14px 20px;border-bottom:1px solid var(--border)}
+.comment-meta{display:flex;align-items:baseline;gap:6px;margin-bottom:4px}
+.comment-author{font-weight:700;font-size:.88rem}
+.comment-time{font-size:.78rem;color:var(--text-light)}
+.comment-body{font-size:.9rem;line-height:1.55;word-break:break-word}
+.comment-form{padding:16px 20px;border-bottom:1px solid var(--border)}
+.comment-input{width:100%;border:1.5px solid var(--border);border-radius:var(--radius);
+  padding:12px 14px;font-size:.9rem;resize:none;outline:none;min-height:80px;
+  transition:border-color .15s;line-height:1.5}
+.comment-input:focus{border-color:var(--primary)}
+.comment-form-footer{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
+.comment-form-footer .char-count{font-size:.78rem}
+
+/* ── Profile ─────────────────────────────────── */
+.profile-header{background:var(--surface);border-bottom:1px solid var(--border);padding:24px 20px}
+.profile-cover{height:120px;background:linear-gradient(135deg,var(--primary),var(--primary-dark));
+  border-radius:var(--radius-sm);margin-bottom:-44px;position:relative}
+.profile-avatar-wrap{padding:0 20px;margin-top:0;position:relative;z-index:1}
+.profile-info{padding:0 20px;margin-top:12px}
+.profile-name{font-size:1.15rem;font-weight:700;margin-bottom:2px}
+.profile-handle{color:var(--text-muted);font-size:.88rem;margin-bottom:8px}
+.profile-bio{font-size:.9rem;line-height:1.6;color:var(--text);margin-bottom:12px}
+.profile-stats{display:flex;gap:20px;font-size:.88rem}
+.profile-stat a{color:var(--text)}
+.profile-stat span{font-weight:700}
+.profile-stat .label{color:var(--text-muted)}
+.profile-actions{display:flex;gap:8px;margin-top:14px}
+.follow-btn{border-radius:var(--radius-full);padding:9px 20px;font-size:.88rem;font-weight:700;
+  border:none;cursor:pointer;transition:all .15s}
+.follow-btn.not-following{background:var(--text);color:#fff}
+.follow-btn.not-following:hover{background:#334155}
+.follow-btn.following{background:transparent;color:var(--text);border:1.5px solid var(--border)}
+.follow-btn.following:hover{border-color:var(--like);color:var(--like)}
+
+/* ── Search ──────────────────────────────────── */
+.search-box{padding:16px 20px;border-bottom:1px solid var(--border);background:var(--surface)}
+.search-input-wrap{position:relative}
+.search-input-wrap svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);
+  width:18px;height:18px;color:var(--text-muted)}
+.search-input{width:100%;padding:11px 16px 11px 40px;border:1.5px solid var(--border);
+  border-radius:var(--radius-full);font-size:.92rem;outline:none;transition:all .15s;background:var(--bg)}
+.search-input:focus{border-color:var(--primary);background:var(--surface);box-shadow:0 0 0 3px rgba(14,165,233,.1)}
+.user-card{display:flex;align-items:center;gap:12px;padding:14px 20px;
+  border-bottom:1px solid var(--border);background:var(--surface);
+  cursor:pointer;transition:background .1s}
+.user-card:hover{background:var(--bg)}
+.user-card-info{flex:1;min-width:0}
+.user-card-name{font-weight:700;font-size:.92rem}
+.user-card-handle{font-size:.82rem;color:var(--text-muted)}
+.user-card-bio{font-size:.82rem;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ── Right Panel ─────────────────────────────── */
+.rp-section{margin-bottom:24px}
+.rp-title{font-size:.95rem;font-weight:700;margin-bottom:12px;color:var(--text)}
+.suggest-card{display:flex;align-items:center;gap:10px;padding:10px 12px;
+  border-radius:var(--radius-sm);cursor:pointer;transition:background .15s;margin-bottom:4px}
+.suggest-card:hover{background:var(--bg)}
+.suggest-info{flex:1;min-width:0}
+.suggest-name{font-size:.88rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.suggest-handle{font-size:.78rem;color:var(--text-muted)}
+
+/* ── Follow List ─────────────────────────────── */
+.empty-state{padding:48px 20px;text-align:center;color:var(--text-muted)}
+.empty-state svg{width:48px;height:48px;margin:0 auto 16px;opacity:.4}
+.empty-state p{font-size:.95rem}
+.load-more-btn{width:100%;padding:14px;background:none;border:none;color:var(--primary);
+  font-size:.9rem;font-weight:600;cursor:pointer;border-top:1px solid var(--border)}
+.load-more-btn:hover{background:var(--primary-light)}
+
+/* ── Toast ───────────────────────────────────── */
+.toast-container{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+  z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none;
+  min-width:280px;max-width:420px}
+.toast{padding:13px 20px;border-radius:var(--radius);box-shadow:var(--shadow-lg);
+  font-size:.88rem;font-weight:500;animation:slideUp .25s ease;pointer-events:auto;
+  display:flex;align-items:center;gap:8px}
+.toast.success{background:#1a1a2e;color:#fff}
+.toast.error{background:#7f1d1d;color:#fff}
+.toast.info{background:#1e293b;color:#fff}
+@keyframes slideUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── Modal ───────────────────────────────────── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;
+  display:none;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface);border-radius:20px;padding:28px;max-width:400px;
+  width:90%;box-shadow:var(--shadow-lg);animation:fadeScale .2s ease}
+@keyframes fadeScale{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+.modal h3{font-size:1.1rem;font-weight:700;margin-bottom:8px}
+.modal p{color:var(--text-muted);font-size:.9rem;margin-bottom:20px}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end}
+
+/* ── Image Lightbox ──────────────────────────── */
+.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:300;
+  display:none;align-items:center;justify-content:center}
+.lightbox.open{display:flex}
+.lightbox img{max-width:90vw;max-height:90vh;border-radius:var(--radius-sm);object-fit:contain}
+.lightbox-close{position:absolute;top:20px;right:20px;background:rgba(255,255,255,.15);
+  border:none;color:#fff;border-radius:var(--radius-full);width:40px;height:40px;
+  cursor:pointer;font-size:1.2rem;display:flex;align-items:center;justify-content:center}
+
+/* ── Dividers / Tags ─────────────────────────── */
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:var(--radius-full);
+  font-size:.75rem;font-weight:600}
+.badge-blue{background:var(--primary-light);color:var(--primary-dark)}
+.divider{border:none;border-top:1px solid var(--border);margin:0}
+.tag{color:var(--primary);font-weight:500}
+.hashtag{color:var(--primary);font-weight:500;cursor:pointer}
+.hashtag:hover{text-decoration:underline}
+.count-num{font-variant-numeric:tabular-nums}
+
+/* ── Utility ─────────────────────────────────── */
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
+.flex{display:flex}.items-center{align-items:center}.gap-2{gap:8px}.gap-3{gap:12px}.mt-1{margin-top:4px}
+.text-sm{font-size:.85rem}.text-xs{font-size:.78rem}.text-muted{color:var(--text-muted)}
+.font-bold{font-weight:700}.font-semibold{font-weight:600}
+.w-full{width:100%}
+.spinner{width:24px;height:24px;border:3px solid var(--border);border-top-color:var(--primary);
+  border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── Responsive ──────────────────────────────── */
+@media(max-width:1100px){
+  .right-panel{display:none}
+  .main-content{margin-right:0;max-width:none}
+}
+@media(max-width:700px){
+  .sidebar{transform:translateX(-100%);transition:transform .25s}
+  .sidebar.open{transform:translateX(0)}
+  .main-content{margin-left:0}
+  .app-layout{padding-bottom:64px}
+  .bottom-nav{display:flex}
+  .sidebar-logo-text{display:none}
+}
+.bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--surface);
+  border-top:1px solid var(--border);z-index:100;justify-content:space-around;padding:8px 0 12px}
+.bn-item{display:flex;flex-direction:column;align-items:center;gap:3px;background:none;
+  border:none;color:var(--text-muted);font-size:.7rem;padding:6px 12px;cursor:pointer}
+.bn-item svg{width:22px;height:22px}
+.bn-item.active{color:var(--primary)}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<div id="modal-overlay" class="modal-overlay" onclick="closeModal(event)">
+  <div id="modal-box" class="modal"></div>
+</div>
+<div id="lightbox" class="lightbox" onclick="closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+  <img id="lightbox-img" src="" alt="">
+</div>
+<div id="toast-container" class="toast-container"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════════
+   ICONS
+═══════════════════════════════════════════════════════ */
+const IC = {
+  plane:`<svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg>`,
+  home:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>`,
+  search:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>`,
+  user:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
+  heart:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>`,
+  heartFill:`<svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>`,
+  msg:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>`,
+  img:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>`,
+  trash:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3,6 5,6 21,6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>`,
+  back:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12,19 5,12 12,5"/></svg>`,
+  logout:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>`,
+  plus:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`,
+  dots:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>`,
+  userPlus:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>`,
+  userCheck:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17,11 19,13 23,9"/></svg>`,
+};
+
+/* ═══════════════════════════════════════════════════════
+   MOCK DATA
+═══════════════════════════════════════════════════════ */
+const NOW = Date.now();
+const M = 60000, H = 3600000, D = 86400000;
+
+const USERS = [
+  {id:1,username:'yamada_taro',name:'山田太郎',email:'taro@example.com',password:'password123',
+   bio:'旅好きエンジニア🧳 47都道府県制覇を目指してます！食べ歩きと温泉が特に好きです。',
+   av:'Y',color:'#0EA5E9',followingIds:[2,3]},
+  {id:2,username:'tanaka_hanako',name:'田中花子',email:'hanako@example.com',password:'password123',
+   bio:'写真好き旅行ブロガー📸 海外30カ国以上訪問！インスタ映えスポット収集中。',
+   av:'H',color:'#F59E0B',followingIds:[1,3,4]},
+  {id:3,username:'suzuki_kenji',name:'鈴木健二',email:'kenji@example.com',password:'password123',
+   bio:'バックパッカー歴10年🌍 カメラ片手に世界を旅する一人旅専門。',
+   av:'K',color:'#10B981',followingIds:[1,2]},
+  {id:4,username:'nakamura_yuki',name:'中村雪',email:'yuki@example.com',password:'password123',
+   bio:'温泉と美食の旅が大好き♨️ 日本全国の名湯を巡ってます。',
+   av:'N',color:'#8B5CF6',followingIds:[2,5]},
+  {id:5,username:'kobayashi_ryo',name:'小林亮',email:'ryo@example.com',password:'password123',
+   bio:'アクティビティ系旅人🏔️ スキー・登山・ダイビングが趣味。',
+   av:'R',color:'#EF4444',followingIds:[1,3,4]},
+];
+
+const POSTS = [
+  {id:1,userId:2,body:'京都・嵐山の竹林を早朝に訪れました！人が少ない時間帯だったおかげで、竹の葉がそよ風に揺れる音と静寂が重なって、本当に幻想的な空間でした✨ 次は紅葉シーズンにも訪れてみたいな🍂 #京都旅行 #嵐山 #竹林',
+   images:['https://picsum.photos/seed/bamboo1/800/500','https://picsum.photos/seed/kyoto99/800/500'],
+   likedBy:[1,3,5],comments:8,ts:NOW-25*M},
+  {id:2,userId:3,body:'沖縄・宮古島の前浜ビーチに来ています！水の透明度が想像以上で感動。水面から5mくらい下まで砂が丸見えです😲 シュノーケリングで熱帯魚とも遭遇しました！ #沖縄ビーチ #宮古島 #沖縄旅行',
+   images:['https://picsum.photos/seed/beach11/800/500','https://picsum.photos/seed/ocean22/800/500','https://picsum.photos/seed/coral33/800/500'],
+   likedBy:[1,2,4,5],comments:15,ts:NOW-90*M},
+  {id:3,userId:1,body:'スイス・ユングフラウヨッホに登ってきました！標高3,454mからの景色は言葉にならない美しさ…雲海の上に突き出したアルプスの峰々が続いていて、しばらく動けなくなってしまいました。人生で一番の絶景かもしれない。',
+   images:[],likedBy:[2,3,4,5],comments:22,ts:NOW-3*H},
+  {id:4,userId:4,body:'台湾・台北の九份に来ました！夜の灯籠に灯りがともる時間帯が特に綺麗で、まるでジブリ映画の世界に迷い込んだ感覚になります🏮 小雨が降っていたけどそれもまた風情があって良かった。',
+   images:['https://picsum.photos/seed/jiufen1/800/500'],
+   likedBy:[1,2,3],comments:11,ts:NOW-5*H},
+  {id:5,userId:5,body:'北海道・富良野のラベンダー畑に行ってきました！紫のじゅうたんが地平線まで続く絶景は圧巻でした。ラベンダーソフトクリームも絶品🌸 #北海道グルメ #富良野 #北海道旅行',
+   images:['https://picsum.photos/seed/lavend1/800/500','https://picsum.photos/seed/lavend2/800/500'],
+   likedBy:[1,2,3,4],comments:28,ts:NOW-8*H},
+  {id:6,userId:2,body:'バリ島・ウブドのライステラスを訪れました！棚田が幾重にも重なる緑の絶景。早朝に来ると朝霧と相まって神秘的な景色が見られます🌿 スパとガムランの音楽も最高でした。',
+   images:['https://picsum.photos/seed/bali1a/800/500','https://picsum.photos/seed/rice11/800/500'],
+   likedBy:[1,3,4,5],comments:34,ts:NOW-12*H},
+  {id:7,userId:3,body:'ニューヨーク・タイムズスクエアで新年を迎えました！カウントダウンの瞬間、100万人以上の人々と一緒に歓声を上げる体験は一生忘れられない。一度は体験する価値あり🗽🎊',
+   images:['https://picsum.photos/seed/nyc111/800/500'],
+   likedBy:[1,2,4,5],comments:67,ts:NOW-20*H},
+  {id:8,userId:1,body:'屋久島に来ています！縄文杉への登山道、往復10時間のトレッキングはきつかったけど、樹齢7000年とも言われる縄文杉を目の前にした瞬間、全ての疲れが吹き飛びました🌳 自然の偉大さを感じた旅でした。',
+   images:['https://picsum.photos/seed/forest1a/800/500','https://picsum.photos/seed/tree22a/800/500','https://picsum.photos/seed/moss3a/800/500'],
+   likedBy:[2,3,4,5],comments:45,ts:NOW-1.1*D},
+  {id:9,userId:4,body:'別府温泉の「地獄めぐり」を楽しんできました♨️ 血の池地獄の真っ赤な温泉は本当にインパクト大！温泉卵も作れて大満足。地元の宿の貸し切り露天風呂も最高でした。 #温泉旅行 #別府温泉 #九州旅行',
+   images:['https://picsum.photos/seed/onsen1a/800/500'],
+   likedBy:[1,2,3,5],comments:19,ts:NOW-1.3*D},
+  {id:10,userId:5,body:'富士山登山、無事に登頂しました！🗻 ご来光を山頂で迎えることができて最高の体験でした。山頂の気温は5℃で装備が重要でした。次は秋の紅葉シーズンに五合目から眺めたい。',
+   images:['https://picsum.photos/seed/fuji1a/800/500','https://picsum.photos/seed/sunrise1a/800/500'],
+   likedBy:[1,2,3,4],comments:89,ts:NOW-1.5*D},
+  {id:11,userId:2,body:'パリ・モンマルトルの丘からの夜景！サクレ・クール寺院がライトアップされて本当に美しかったです。カフェでワインを飲みながらエッフェル塔の輝きを眺める夜は格別でした🗼❤️ #ヨーロッパ旅行 #パリ #フランス旅行',
+   images:['https://picsum.photos/seed/paris1a/800/500'],
+   likedBy:[1,3,4,5],comments:42,ts:NOW-2*D},
+  {id:12,userId:3,body:'タイ・チェンマイのランタンフェスティバル（イーペン祭り）に参加！数千個のランタンが夜空に舞い上がる瞬間は息を飲む美しさでした。願いを込めてランタンを空に放ったら泣きそうになりました🏮✨',
+   images:['https://picsum.photos/seed/lantern1a/800/500','https://picsum.photos/seed/thai2a/800/500'],
+   likedBy:[1,2,4,5],comments:156,ts:NOW-2.5*D},
+];
+
+const COMMENTS_DB = {
+  1:[
+    {id:1,postId:1,userId:1,body:'早朝の竹林は格別ですよね！私も一度行ってみたいです✨',ts:NOW-20*M},
+    {id:2,postId:1,userId:3,body:'嵐山は何度行っても飽きないですね。秋の紅葉シーズンもぜひ！',ts:NOW-15*M},
+    {id:3,postId:1,userId:5,body:'写真がとても綺麗です！カメラは何を使っているんですか？',ts:NOW-10*M},
+  ],
+  2:[
+    {id:4,postId:2,userId:1,body:'宮古島！憧れです。透明度本当にすごいですね。今度行く時に参考にします。',ts:NOW-80*M},
+    {id:5,postId:2,userId:4,body:'シュノーケリング楽しそう！海が苦手なんですがこの写真を見たら行きたくなりました。',ts:NOW-60*M},
+  ],
+  3:[
+    {id:6,postId:3,userId:2,body:'ユングフラウ！いつか行きたいと思っていました。寒さはどうでしたか？',ts:NOW-2.5*H},
+    {id:7,postId:3,userId:5,body:'スイスは食べ物も美味しいですよね。チーズフォンデュ食べました？',ts:NOW-2*H},
+  ],
+  4:[
+    {id:8,postId:4,userId:2,body:'九份懐かしい！5年前に行きました。夜景がホント最高ですよね🏮',ts:NOW-4.5*H},
+    {id:9,postId:4,userId:5,body:'台湾は食べ物も美味しいですよね。小籠包食べ放題したい笑',ts:NOW-3.5*H},
+  ],
+  5:[
+    {id:10,postId:5,userId:1,body:'富良野のラベンダーは7月が一番きれいですよね！',ts:NOW-7.5*H},
+  ],
+};
+
+/* ═══════════════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════════════ */
+let S = {
+  user: null,          // logged-in user
+  page: 'login',
+  params: {},
+  posts: POSTS.map(p=>({...p,likedBy:[...p.likedBy]})),
+  users: USERS.map(u=>({...u,followingIds:[...u.followingIds]})),
+  comments: Object.fromEntries(Object.entries(COMMENTS_DB).map(([k,v])=>[k,v.map(c=>({...c}))])),
+  timelineTab: 'all',
+  loadedCount: 8,
+  composeText: '',
+  composeImages: [],  // {url, file}
+  nextPostId: 20,
+  nextCommentId: 50,
+};
+
+/* ═══════════════════════════════════════════════════════
+   UTILS
+═══════════════════════════════════════════════════════ */
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const uid = () => ++S.nextPostId;
+
+// 投稿本文中の #タグ をクリッカブルなスパンに変換する
+function formatPostBody(text) {
+  return esc(text).replace(
+    /#([\w　-鿿゠-ヿ぀-ゟ一-龯]+)/g,
+    (match) => `<span class="hashtag" onclick="event.stopPropagation();navigate('tag',{tag:'${match}'})">${match}</span>`
+  );
+}
+const ucid = () => ++S.nextCommentId;
+
+function fmtTime(ts) {
+  const d = Date.now() - ts;
+  if (d < 60*M) return `${Math.max(1,Math.floor(d/M))}分前`;
+  if (d < H) return `${Math.floor(d/M)}分前`;
+  if (d < 24*H) return `${Math.floor(d/H)}時間前`;
+  const dt = new Date(ts);
+  return `${dt.getFullYear()}/${String(dt.getMonth()+1).padStart(2,'0')}/${String(dt.getDate()).padStart(2,'0')} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}`;
+}
+
+function fmtCount(n) {
+  if (n >= 10000) return (n/1000).toFixed(0)+'K';
+  if (n >= 1000) return (n/1000).toFixed(1).replace('.0','')+'K';
+  return n;
+}
+
+function getUser(id) { return S.users.find(u=>u.id===id); }
+function getPost(id) { return S.posts.find(p=>p.id===id); }
+function currentUser() { return S.user; }
+
+function avatar(user, cls='') {
+  return `<div class="avatar ${cls}" style="background:${user.color}">${user.av}</div>`;
+}
+
+function isLiked(post) {
+  return S.user && post.likedBy.includes(S.user.id);
+}
+function isFollowing(targetId) {
+  if (!S.user) return false;
+  const u = getUser(S.user.id);
+  return u.followingIds.includes(targetId);
+}
+function getFollowers(userId) {
+  return S.users.filter(u=>u.followingIds.includes(userId));
+}
+function getFollowing(userId) {
+  const u = getUser(userId);
+  return u.followingIds.map(id=>getUser(id)).filter(Boolean);
+}
+
+/* ═══════════════════════════════════════════════════════
+   RENDER HELPERS
+═══════════════════════════════════════════════════════ */
+function renderImageGrid(images) {
+  if (!images || !images.length) return '';
+  const n = images.length;
+  const cls = `n${Math.min(n,4)}`;
+  const cells = images.slice(0,4).map((src,i)=>
+    `<div class="img-cell" onclick="openLightbox(event,'${esc(src)}')">
+       <img src="${esc(src)}" alt="旅行写真" loading="lazy" onerror="this.style.minHeight='120px';this.style.background='#E2E8F0'">
+     </div>`
+  ).join('');
+  return `<div class="img-grid ${cls}">${cells}</div>`;
+}
+
+function renderPostCard(post, clickable=true) {
+  const u = getUser(post.userId);
+  if (!u) return '';
+  const liked = isLiked(post);
+  const isOwn = S.user && post.userId === S.user.id;
+  const body = post.body.length > 200
+    ? `${formatPostBody(post.body.slice(0,200))}<button class="post-expand" onclick="event.stopPropagation();navigate('post',{id:${post.id}})">…続きを読む</button>`
+    : formatPostBody(post.body);
+  const clickAttr = clickable ? `onclick="navigate('post',{id:${post.id}})"` : '';
+  return `
+<div class="post-card" data-post-id="${post.id}" ${clickAttr}>
+  <div class="post-header">
+    <div onclick="event.stopPropagation();navigate('profile',{id:${u.id}})" style="cursor:pointer">
+      ${avatar(u)}
+    </div>
+    <div class="post-meta">
+      <div class="post-author">
+        <span class="author-name" onclick="event.stopPropagation();navigate('profile',{id:${u.id}})" style="cursor:pointer">${esc(u.name)}</span>
+        <span class="author-handle">@${esc(u.username)}</span>
+        <span class="post-time">· ${fmtTime(post.ts)}</span>
+      </div>
+    </div>
+    ${isOwn ? `<button class="btn-icon post-more" onclick="event.stopPropagation();confirmDelete('post',${post.id})" title="削除">${IC.trash}</button>` : ''}
+  </div>
+  <div class="post-body">${body}</div>
+  ${renderImageGrid(post.images)}
+  <div class="post-actions">
+    <button class="action-btn" onclick="event.stopPropagation();navigate('post',{id:${post.id}})">
+      ${IC.msg} <span>${fmtCount((S.comments[post.id]||[]).length)}</span>
+    </button>
+    <button class="action-btn ${liked?'liked':''}" onclick="event.stopPropagation();toggleLike(${post.id})" id="like-btn-${post.id}">
+      <span class="like-icon">${liked?IC.heartFill:IC.heart}</span>
+      <span id="like-count-${post.id}">${fmtCount(post.likedBy.length)}</span>
+    </button>
+  </div>
+</div>`;
+}
+
+/* ═══════════════════════════════════════════════════════
+   PAGES
+═══════════════════════════════════════════════════════ */
+function renderLogin() {
+  return `
+<div class="auth-screen">
+  <div class="auth-card">
+    <div class="auth-logo">${IC.plane}<span class="auth-logo-text">Trip<span>Share</span></span></div>
+    <h2 class="auth-title">おかえりなさい</h2>
+    <p class="auth-subtitle">旅の記録を続けましょう</p>
+    <div class="auth-demo"><b>🎯 デモアカウント</b>メール: taro@example.com　パスワード: password123</div>
+    <div class="field" id="f-email">
+      <label>メールアドレス</label>
+      <input type="email" id="login-email" placeholder="you@example.com" value="taro@example.com" onkeydown="if(event.key==='Enter')doLogin()">
+      <div class="field-error" id="login-email-err"></div>
+    </div>
+    <div class="field" id="f-pass">
+      <label>パスワード</label>
+      <input type="password" id="login-pass" placeholder="8文字以上" value="password123" onkeydown="if(event.key==='Enter')doLogin()">
+      <div class="field-error" id="login-pass-err"></div>
+    </div>
+    <div id="login-err" style="color:var(--like);font-size:.85rem;margin-bottom:12px;display:none"></div>
+    <button class="btn btn-primary btn-full" onclick="doLogin()">ログイン</button>
+    <div class="auth-link">アカウントをお持ちでない方 <button onclick="navigate('register')">新規登録</button></div>
+  </div>
+</div>`;
+}
+
+function renderRegister() {
+  return `
+<div class="auth-screen">
+  <div class="auth-card">
+    <div class="auth-logo">${IC.plane}<span class="auth-logo-text">Trip<span>Share</span></span></div>
+    <h2 class="auth-title">アカウント作成</h2>
+    <p class="auth-subtitle">旅の記録をはじめましょう</p>
+    <div class="field" id="r-f-user">
+      <label>ユーザー名</label>
+      <input type="text" id="reg-user" placeholder="例: travel_taro" onkeydown="if(event.key==='Enter')doRegister()">
+      <div class="field-error" id="reg-user-err"></div>
+    </div>
+    <div class="field" id="r-f-email">
+      <label>メールアドレス</label>
+      <input type="email" id="reg-email" placeholder="you@example.com" onkeydown="if(event.key==='Enter')doRegister()">
+      <div class="field-error" id="reg-email-err"></div>
+    </div>
+    <div class="field" id="r-f-pass">
+      <label>パスワード（8〜128文字）</label>
+      <input type="password" id="reg-pass" placeholder="8文字以上" onkeydown="if(event.key==='Enter')doRegister()">
+      <div class="field-error" id="reg-pass-err"></div>
+    </div>
+    <div id="reg-err" style="color:var(--like);font-size:.85rem;margin-bottom:12px;display:none"></div>
+    <button class="btn btn-primary btn-full" onclick="doRegister()">アカウントを作成</button>
+    <div class="auth-link">すでにアカウントをお持ちの方 <button onclick="navigate('login')">ログイン</button></div>
+  </div>
+</div>`;
+}
+
+function renderSidebar() {
+  const u = currentUser();
+  const p = S.page;
+  return `
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-logo">${IC.plane}<span class="sidebar-logo-text">Trip<span>Share</span></span></div>
+  <ul class="nav-list">
+    <li><button class="nav-item ${p==='timeline'?'active':''}" onclick="navigate('timeline')">${IC.home} ホーム</button></li>
+    <li><button class="nav-item ${p==='search'?'active':''}" onclick="navigate('search')">${IC.search} 検索</button></li>
+    <li><button class="nav-item ${p==='profile'&&S.params.id===u.id?'active':''}" onclick="navigate('profile',{id:${u.id}})">${IC.user} プロフィール</button></li>
+  </ul>
+  <button class="btn-compose" onclick="scrollToCompose()">✈️ 投稿する</button>
+  <div class="sidebar-user" onclick="navigate('profile',{id:${u.id}})">
+    ${avatar(u,'sm')}
+    <div class="sidebar-user-info">
+      <div class="sidebar-user-name">${esc(u.name)}</div>
+      <div class="sidebar-user-handle">@${esc(u.username)}</div>
+    </div>
+    <button class="logout-btn" onclick="event.stopPropagation();doLogout()" title="ログアウト">${IC.logout}</button>
+  </div>
+</nav>`;
+}
+
+function renderBottomNav() {
+  const p = S.page;
+  const u = currentUser();
+  return `
+<nav class="bottom-nav" id="bottom-nav">
+  <button class="bn-item ${p==='timeline'?'active':''}" onclick="navigate('timeline')">${IC.home}<span>ホーム</span></button>
+  <button class="bn-item ${p==='search'?'active':''}" onclick="navigate('search')">${IC.search}<span>検索</span></button>
+  <button class="bn-item" onclick="scrollToCompose()">${IC.plus}<span>投稿</span></button>
+  <button class="bn-item ${p==='profile'?'active':''}" onclick="navigate('profile',{id:${u.id}})">${IC.user}<span>プロフィール</span></button>
+</nav>`;
+}
+
+function renderRightPanel() {
+  const u = currentUser();
+  const suggestions = S.users.filter(x=>x.id!==u.id && !isFollowing(x.id)).slice(0,4);
+  const trendItems = [
+    {tag:'#京都旅行',count:'2.4K'},
+    {tag:'#沖縄ビーチ',count:'1.8K'},
+    {tag:'#北海道グルメ',count:'1.2K'},
+    {tag:'#ヨーロッパ旅行',count:'856'},
+    {tag:'#温泉旅行',count:'643'},
+  ];
+  return `
+<aside class="right-panel">
+  <div class="rp-section">
+    <div class="rp-title">おすすめユーザー</div>
+    ${suggestions.length ? suggestions.map(su=>`
+      <div class="suggest-card">
+        ${avatar(su,'sm')}
+        <div class="suggest-info" onclick="navigate('profile',{id:${su.id}})" style="cursor:pointer">
+          <div class="suggest-name">${esc(su.name)}</div>
+          <div class="suggest-handle">@${esc(su.username)}</div>
+        </div>
+        <button class="btn btn-sm btn-outline" onclick="doFollow(${su.id})">フォロー</button>
+      </div>`).join('') : '<p class="text-muted text-sm">全員フォロー中です！</p>'}
+  </div>
+  <div class="rp-section">
+    <div class="rp-title">トレンドタグ</div>
+    ${trendItems.map(t=>`
+      <div class="suggest-card" style="padding:10px 12px" onclick="navigate('tag',{tag:'${t.tag}'})">
+        <div>
+          <div class="tag font-semibold text-sm">${t.tag}</div>
+          <div class="text-xs text-muted">${S.posts.filter(p=>p.body.includes(t.tag)).length} 件の投稿</div>
+        </div>
+      </div>`).join('')}
+  </div>
+</aside>`;
+}
+
+function renderTimeline() {
+  const u = currentUser();
+  const tab = S.timelineTab;
+  let posts = [...S.posts].sort((a,b)=>b.ts-a.ts);
+  if (tab === 'following') {
+    const fu = getUser(u.id);
+    posts = posts.filter(p=>fu.followingIds.includes(p.userId));
+  }
+  const visible = posts.slice(0, S.loadedCount);
+  const hasMore = posts.length > S.loadedCount;
+
+  return `
+<div>
+  <div class="page-header">
+    <h1>✈️ TripShare</h1>
+  </div>
+  <div class="compose-box">
+    <div class="compose-inner">
+      <div onclick="navigate('profile',{id:${u.id}})" style="cursor:pointer">${avatar(u)}</div>
+      <div style="flex:1">
+        <textarea class="compose-textarea" id="compose-text" placeholder="旅の記録を共有しよう..." maxlength="280"
+          oninput="onComposeInput(this)" rows="3">${esc(S.composeText)}</textarea>
+        <div id="img-previews" class="image-preview-list">${renderComposePreviews()}</div>
+        <div class="compose-footer">
+          <label for="image-input" class="btn btn-icon" title="画像を追加（最大4枚）">${IC.img}</label>
+          <input type="file" id="image-input" accept="image/jpeg,image/png,image/gif" multiple onchange="onImageSelect(this)">
+          <span class="char-count ${S.composeText.length>250?'over':S.composeText.length>220?'warn':''}" id="char-count">${S.composeText.length}/280</span>
+          <button class="btn btn-primary btn-sm" onclick="doCreatePost()">投稿する</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="tab-bar">
+    <button class="tab ${tab==='all'?'active':''}" onclick="switchTab('all')">全体</button>
+    <button class="tab ${tab==='following'?'active':''}" onclick="switchTab('following')">フォロー中</button>
+  </div>
+  ${visible.length===0
+    ? `<div class="empty-state">${IC.plane}<p>${tab==='following'?'フォロー中のユーザーの投稿がありません':'まだ投稿がありません'}</p></div>`
+    : visible.map(p=>renderPostCard(p)).join('')}
+  ${hasMore
+    ? `<button class="load-more-btn" onclick="loadMore()">さらに読み込む</button>`
+    : posts.length>0 ? `<div class="empty-state" style="padding:24px"><p style="font-size:.82rem">これ以上投稿がありません</p></div>` : ''}
+</div>`;
+}
+
+function renderComposePreviews() {
+  return S.composeImages.map((img,i)=>`
+    <div class="image-preview-item">
+      <img src="${img.url}" alt="">
+      <button class="image-preview-remove" onclick="removeComposeImage(${i})">✕</button>
+    </div>`).join('');
+}
+
+function renderPostDetail() {
+  const post = getPost(S.params.id);
+  if (!post) return `<div class="empty-state">投稿が見つかりません</div>`;
+  const u = getUser(post.userId);
+  const cu = currentUser();
+  const liked = isLiked(post);
+  const isOwn = cu && post.userId === cu.id;
+  const cmts = (S.comments[post.id] || []).slice().sort((a,b)=>b.ts-a.ts);
+
+  return `
+<div>
+  <div class="page-header">
+    <button class="back-btn" onclick="history.back()">${IC.back}</button>
+    <h1>投稿</h1>
+  </div>
+  <div class="post-card" style="cursor:default" onclick="">
+    <div class="post-header">
+      <div onclick="navigate('profile',{id:${u.id}})" style="cursor:pointer">${avatar(u)}</div>
+      <div class="post-meta">
+        <div class="post-author">
+          <span class="author-name" onclick="navigate('profile',{id:${u.id}})" style="cursor:pointer">${esc(u.name)}</span>
+          <span class="author-handle">@${esc(u.username)}</span>
+        </div>
+        <span class="post-time">${fmtTime(post.ts)}</span>
+      </div>
+      ${isOwn ? `<button class="btn-icon" onclick="confirmDelete('post',${post.id})" title="削除">${IC.trash}</button>` : ''}
+    </div>
+    <div class="post-body" style="font-size:1.1rem;margin-bottom:16px">${formatPostBody(post.body)}</div>
+    ${renderImageGrid(post.images)}
+    <div class="post-actions" style="border-top:1px solid var(--border);padding-top:12px;margin-top:4px">
+      <button class="action-btn ${liked?'liked':''}" onclick="toggleLike(${post.id})" id="like-btn-${post.id}" style="font-size:.95rem">
+        <span class="like-icon">${liked?IC.heartFill:IC.heart}</span>
+        <span id="like-count-${post.id}">${fmtCount(post.likedBy.length)}</span> いいね
+      </button>
+      <span style="margin-left:16px;color:var(--text-muted);font-size:.88rem">${cmts.length} コメント</span>
+    </div>
+  </div>
+  <div class="comment-form">
+    <div style="display:flex;gap:10px">
+      ${avatar(cu,'sm')}
+      <div style="flex:1">
+        <textarea class="comment-input" id="comment-text" placeholder="コメントを入力…（200文字以内）" rows="3" oninput="onCommentInput(this)"></textarea>
+        <div class="comment-form-footer">
+          <span class="char-count" id="comment-count">0/200</span>
+          <button class="btn btn-primary btn-sm" onclick="doAddComment(${post.id})">送信</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="page-header" style="position:static">
+    <span style="font-size:.9rem;color:var(--text-muted)">コメント ${cmts.length}件</span>
+  </div>
+  ${cmts.length===0
+    ? `<div class="empty-state"><p>まだコメントがありません</p></div>`
+    : cmts.map(c=>renderCommentCard(c, post.id)).join('')}
+</div>`;
+}
+
+function renderCommentCard(c, postId) {
+  const u = getUser(c.userId);
+  const isOwn = S.user && c.userId === S.user.id;
+  return `
+<div class="comment-card" id="comment-${c.id}">
+  <div onclick="navigate('profile',{id:${u.id}})" style="cursor:pointer">${avatar(u,'sm')}</div>
+  <div style="flex:1">
+    <div class="comment-meta">
+      <span class="comment-author" onclick="navigate('profile',{id:${u.id}})" style="cursor:pointer">${esc(u.name)}</span>
+      <span class="text-muted text-xs">@${esc(u.username)}</span>
+      <span class="comment-time">${fmtTime(c.ts)}</span>
+      ${isOwn ? `<button class="btn-icon" style="margin-left:auto;width:28px;height:28px;padding:4px" onclick="confirmDelete('comment',${c.id},${postId})">${IC.trash}</button>` : ''}
+    </div>
+    <div class="comment-body">${esc(c.body)}</div>
+  </div>
+</div>`;
+}
+
+function renderProfile() {
+  const targetId = S.params.id;
+  const u = getUser(targetId);
+  if (!u) return `<div class="empty-state">ユーザーが見つかりません</div>`;
+  const cu = currentUser();
+  const isOwn = cu.id === targetId;
+  const following = isFollowing(targetId);
+  const followers = getFollowers(targetId);
+  const followingList = getFollowing(targetId);
+  const userPosts = S.posts.filter(p=>p.userId===targetId).sort((a,b)=>b.ts-a.ts);
+
+  return `
+<div>
+  <div class="page-header">
+    <button class="back-btn" onclick="history.back()">${IC.back}</button>
+    <div>
+      <h1>${esc(u.name)}</h1>
+      <div style="font-size:.8rem;color:var(--text-muted)">${userPosts.length} 件の投稿</div>
+    </div>
+  </div>
+  <div class="profile-header">
+    <div class="profile-cover"></div>
+    <div class="profile-avatar-wrap" style="padding-top:12px;display:flex;justify-content:space-between;align-items:flex-end">
+      ${avatar(u,'xl')}
+      ${!isOwn ? `
+        <button class="follow-btn ${following?'following':'not-following'}"
+          id="follow-btn-${targetId}"
+          onclick="${following?`doUnfollow(${targetId})`:`doFollow(${targetId})`}">
+          ${following ? 'フォロー中' : 'フォローする'}
+        </button>` : `<button class="btn btn-sm btn-outline" onclick="doEditProfile()">プロフィール編集</button>`}
+    </div>
+    <div class="profile-info">
+      <div class="profile-name">${esc(u.name)}</div>
+      <div class="profile-handle">@${esc(u.username)}</div>
+      ${u.bio ? `<div class="profile-bio">${esc(u.bio)}</div>` : ''}
+      <div class="profile-stats">
+        <div class="profile-stat">
+          <a href="#" onclick="navigate('followList',{id:${targetId},type:'following'});return false">
+            <span>${followingList.length}</span> <span class="label">フォロー中</span>
+          </a>
+        </div>
+        <div class="profile-stat">
+          <a href="#" onclick="navigate('followList',{id:${targetId},type:'followers'});return false">
+            <span>${followers.length}</span> <span class="label">フォロワー</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="page-header" style="position:static">
+    <span style="font-size:.9rem;font-weight:600">投稿</span>
+  </div>
+  ${userPosts.length===0
+    ? `<div class="empty-state"><p>まだ投稿がありません</p></div>`
+    : userPosts.map(p=>renderPostCard(p)).join('')}
+</div>`;
+}
+
+function getAllTags() {
+  const map = {};
+  S.posts.forEach(p => {
+    (p.body.match(/#([\w　-鿿゠-ヿ぀-ゟ一-龯]+)/g) || []).forEach(tag => {
+      map[tag] = (map[tag] || 0) + 1;
+    });
+  });
+  return Object.entries(map).map(([tag, count]) => ({tag, count}));
+}
+
+function renderSearch() {
+  const q   = S.params.q || '';
+  const tab = S.params.searchTab || 'users';
+  const ph  = tab === 'users' ? 'ユーザー名を入力…' : 'タグを入力（# は不要）…';
+
+  let userResults = null;
+  let tagResults  = null;
+
+  if (tab === 'users' && q.trim()) {
+    userResults = S.users.filter(u =>
+      u.username.toLowerCase().includes(q.toLowerCase()) ||
+      u.name.toLowerCase().includes(q.toLowerCase())
+    ).sort((a,b) => a.username.localeCompare(b.username));
+  }
+
+  if (tab === 'tags') {
+    const qClean = q.trim().replace(/^#/, '').toLowerCase();
+    const all = getAllTags();
+    tagResults = qClean
+      ? all.filter(t => t.tag.toLowerCase().includes(qClean)).sort((a,b) => b.count - a.count)
+      : all.sort((a,b) => b.count - a.count);
+  }
+
+  return `
+<div>
+  <div class="page-header"><h1>検索</h1></div>
+  <div class="search-box">
+    <div class="search-input-wrap">
+      ${IC.search}
+      <input class="search-input" id="search-q" type="text" placeholder="${ph}"
+        value="${esc(q)}" maxlength="50"
+        onkeydown="if(event.key==='Enter')doSearch()"
+        oninput="S.params.q=this.value">
+    </div>
+    <div id="search-err" style="color:var(--like);font-size:.82rem;margin-top:6px;display:none"></div>
+    <div style="margin-top:10px">
+      <button class="btn btn-primary btn-sm" onclick="doSearch()">検索</button>
+    </div>
+  </div>
+  <div class="tab-bar">
+    <button class="tab ${tab==='users'?'active':''}" onclick="S.params.searchTab='users';S.params.q='';render()">ユーザー</button>
+    <button class="tab ${tab==='tags'?'active':''}"  onclick="S.params.searchTab='tags';S.params.q='';render()">タグ</button>
+  </div>
+  ${tab === 'users' ? renderUserSearchResults(userResults, q) : renderTagSearchResults(tagResults, q)}
+</div>`;
+}
+
+function renderUserSearchResults(results, q) {
+  if (results === null)
+    return `<div class="empty-state"><p>ユーザー名で検索してみましょう</p></div>`;
+  if (results.length === 0)
+    return `<div class="empty-state"><p>「${esc(q)}」に一致するユーザーが見つかりませんでした</p></div>`;
+  return results.map(u => `
+    <div class="user-card" onclick="navigate('profile',{id:${u.id}})">
+      ${avatar(u)}
+      <div class="user-card-info">
+        <div class="user-card-name">${esc(u.name)}</div>
+        <div class="user-card-handle">@${esc(u.username)}</div>
+        ${u.bio ? `<div class="user-card-bio">${esc(u.bio)}</div>` : ''}
+      </div>
+      ${u.id !== S.user.id ? `
+        <button class="btn btn-sm ${isFollowing(u.id)?'btn-outline':'btn-primary'}"
+          onclick="event.stopPropagation();${isFollowing(u.id)?`doUnfollow(${u.id})`:`doFollow(${u.id})`}">
+          ${isFollowing(u.id)?'フォロー中':'フォロー'}
+        </button>` : ''}
+    </div>`).join('');
+}
+
+function renderTagSearchResults(results, q) {
+  if (!results || results.length === 0)
+    return `<div class="empty-state"><p>${q ? `「${esc(q)}」に一致するタグが見つかりませんでした` : 'タグがまだありません'}</p></div>`;
+  return results.map(({tag, count}) => `
+    <div class="user-card" onclick="navigate('tag',{tag:'${tag}'})">
+      <div class="avatar" style="background:var(--primary);font-size:1.3rem;font-weight:700">#</div>
+      <div class="user-card-info">
+        <div class="user-card-name tag">${esc(tag)}</div>
+        <div class="user-card-handle">${count} 件の投稿</div>
+      </div>
+    </div>`).join('');
+}
+
+function renderTagPage() {
+  const tag = S.params.tag || '';
+  const posts = S.posts.filter(p => p.body.includes(tag)).sort((a,b) => b.ts - a.ts);
+  return `
+<div>
+  <div class="page-header">
+    <button class="back-btn" onclick="history.back()">${IC.back}</button>
+    <div>
+      <h1 class="tag">${esc(tag)}</h1>
+      <div style="font-size:.8rem;color:var(--text-muted)">${posts.length} 件の投稿</div>
+    </div>
+  </div>
+  ${posts.length === 0
+    ? `<div class="empty-state"><p>${esc(tag)} の投稿はまだありません</p></div>`
+    : posts.map(p => renderPostCard(p)).join('')}
+</div>`;
+}
+
+function renderFollowList() {
+  const {id, type} = S.params;
+  const u = getUser(id);
+  if (!u) return '';
+  const list = type === 'followers' ? getFollowers(id) : getFollowing(id);
+  const title = type === 'followers' ? 'フォロワー' : 'フォロー中';
+  return `
+<div>
+  <div class="page-header">
+    <button class="back-btn" onclick="history.back()">${IC.back}</button>
+    <div>
+      <h1>${esc(u.name)}</h1>
+      <div style="font-size:.8rem;color:var(--text-muted)">${title}</div>
+    </div>
+  </div>
+  ${list.length === 0
+    ? `<div class="empty-state"><p>${type==='followers'?'フォロワーがいません':'フォローしているユーザーがいません'}</p></div>`
+    : list.map(fu=>`
+        <div class="user-card" onclick="navigate('profile',{id:${fu.id}})">
+          ${avatar(fu)}
+          <div class="user-card-info">
+            <div class="user-card-name">${esc(fu.name)}</div>
+            <div class="user-card-handle">@${esc(fu.username)}</div>
+            ${fu.bio ? `<div class="user-card-bio">${esc(fu.bio)}</div>` : ''}
+          </div>
+          ${fu.id !== S.user.id ? `
+            <button class="btn btn-sm ${isFollowing(fu.id)?'btn-outline':'btn-primary'}"
+              onclick="event.stopPropagation();${isFollowing(fu.id)?`doUnfollow(${fu.id})`:`doFollow(${fu.id})`}">
+              ${isFollowing(fu.id)?'フォロー中':'フォロー'}
+            </button>` : '<span class="badge badge-blue">あなた</span>'}
+        </div>`).join('')}
+</div>`;
+}
+
+/* ═══════════════════════════════════════════════════════
+   MAIN RENDER
+═══════════════════════════════════════════════════════ */
+function render() {
+  const root = document.getElementById('root');
+  if (!S.user) {
+    root.innerHTML = S.page === 'register' ? renderRegister() : renderLogin();
+    return;
+  }
+  let pageHtml = '';
+  switch(S.page) {
+    case 'timeline':    pageHtml = renderTimeline(); break;
+    case 'post':        pageHtml = renderPostDetail(); break;
+    case 'profile':     pageHtml = renderProfile(); break;
+    case 'search':      pageHtml = renderSearch(); break;
+    case 'followList':  pageHtml = renderFollowList(); break;
+    case 'tag':         pageHtml = renderTagPage(); break;
+    default:            pageHtml = renderTimeline(); S.page='timeline';
+  }
+  root.innerHTML = `
+    <div class="app-layout">
+      ${renderSidebar()}
+      <div class="main-content">${pageHtml}</div>
+      ${renderRightPanel()}
+    </div>
+    ${renderBottomNav()}`;
+  window.scrollTo(0,0);
+}
+
+/* ═══════════════════════════════════════════════════════
+   NAVIGATION
+═══════════════════════════════════════════════════════ */
+const _history = [];
+function navigate(page, params={}) {
+  _history.push({page:S.page, params:{...S.params}});
+  S.page = page;
+  S.params = params;
+  if (page==='timeline') { S.loadedCount=8; }
+  if (page==='search' && !S.params.searchTab) { S.params.searchTab='users'; }
+  render();
+}
+window.history.back = () => {
+  if (_history.length) {
+    const prev = _history.pop();
+    S.page = prev.page;
+    S.params = prev.params;
+    render();
+  } else { navigate('timeline'); }
+};
+
+/* ═══════════════════════════════════════════════════════
+   ACTIONS – AUTH
+═══════════════════════════════════════════════════════ */
+function validateEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+
+function doLogin() {
+  const email = (document.getElementById('login-email')||{}).value||'';
+  const pass = (document.getElementById('login-pass')||{}).value||'';
+  let ok = true;
+  if (!email || !validateEmail(email)) {
+    setFieldErr('login-email-err','f-email','メールアドレスの形式が正しくありません');
+    ok=false;
+  } else clearFieldErr('login-email-err','f-email');
+  if (!pass || pass.length<8) {
+    setFieldErr('login-pass-err','f-pass','パスワードは8文字以上で入力してください');
+    ok=false;
+  } else clearFieldErr('login-pass-err','f-pass');
+  if (!ok) return;
+  const u = S.users.find(u=>u.email===email && u.password===pass);
+  if (!u) {
+    const el=document.getElementById('login-err');
+    if(el){el.textContent='メールアドレスまたはパスワードが正しくありません';el.style.display='block';}
+    return;
+  }
+  S.user = u;
+  S.page = 'timeline';
+  S.params = {};
+  showToast(`ようこそ、${u.name}さん！`, 'success');
+  render();
+}
+
+function doLogout() {
+  showConfirm('ログアウトしますか？', ()=>{
+    S.user = null;
+    S.page = 'login';
+    S.composeText = '';
+    S.composeImages = [];
+    render();
+    showToast('ログアウトしました', 'info');
+  });
+}
+
+function doRegister() {
+  const username = (document.getElementById('reg-user')||{}).value||'';
+  const email = (document.getElementById('reg-email')||{}).value||'';
+  const pass = (document.getElementById('reg-pass')||{}).value||'';
+  let ok=true;
+  if (!username || username.length<2) {
+    setFieldErr('reg-user-err','r-f-user','ユーザー名を2文字以上で入力してください');ok=false;
+  } else if (S.users.find(u=>u.username===username)) {
+    setFieldErr('reg-user-err','r-f-user','このユーザー名は既に使用されています');ok=false;
+  } else clearFieldErr('reg-user-err','r-f-user');
+  if (!email||!validateEmail(email)) {
+    setFieldErr('reg-email-err','r-f-email','正しいメールアドレスを入力してください');ok=false;
+  } else if (S.users.find(u=>u.email===email)) {
+    setFieldErr('reg-email-err','r-f-email','このメールアドレスは既に登録されています');ok=false;
+  } else clearFieldErr('reg-email-err','r-f-email');
+  if (!pass||pass.length<8) {
+    setFieldErr('reg-pass-err','r-f-pass','パスワードは8文字以上128文字以下で入力してください');ok=false;
+  } else if (pass.length>128) {
+    setFieldErr('reg-pass-err','r-f-pass','パスワードは128文字以下で入力してください');ok=false;
+  } else clearFieldErr('reg-pass-err','r-f-pass');
+  if (!ok) return;
+  const colors=['#0EA5E9','#F59E0B','#10B981','#8B5CF6','#EF4444','#F97316','#14B8A6'];
+  const newUser = {
+    id: S.users.length+1, username, name: username, email, password: pass,
+    bio: '', av: username[0].toUpperCase(),
+    color: colors[S.users.length % colors.length], followingIds:[]
+  };
+  S.users.push(newUser);
+  S.user = newUser;
+  S.page = 'timeline';
+  showToast('アカウントを作成しました！旅の記録を投稿してみましょう ✈️', 'success');
+  render();
+}
+
+function setFieldErr(errId, fieldId, msg) {
+  const e=document.getElementById(errId); if(e){e.textContent=msg;e.style.display='block';}
+  const f=document.getElementById(fieldId); if(f)f.classList.add('has-error');
+}
+function clearFieldErr(errId, fieldId) {
+  const e=document.getElementById(errId); if(e)e.style.display='none';
+  const f=document.getElementById(fieldId); if(f)f.classList.remove('has-error');
+}
+
+/* ═══════════════════════════════════════════════════════
+   ACTIONS – POSTS
+═══════════════════════════════════════════════════════ */
+function onComposeInput(el) {
+  S.composeText = el.value;
+  const n = el.value.length;
+  const cc = document.getElementById('char-count');
+  if (cc) {
+    cc.textContent = `${n}/280`;
+    cc.className = `char-count ${n>280?'over':n>250?'warn':''}`;
+  }
+}
+
+function onImageSelect(input) {
+  const files = Array.from(input.files);
+  const total = S.composeImages.length + files.length;
+  if (total > 4) { showToast('画像は最大4枚まで添付できます', 'error'); input.value=''; return; }
+  const allowed = ['image/jpeg','image/png','image/gif'];
+  for (const f of files) {
+    if (!allowed.includes(f.type)) { showToast(`${f.name}: JPEG・PNG・GIF形式のみ対応しています`, 'error'); continue; }
+    if (f.size > 5*1024*1024) { showToast(`${f.name}: ファイルサイズは5MB以下にしてください`, 'error'); continue; }
+    const reader = new FileReader();
+    reader.onload = e => {
+      S.composeImages.push({url: e.target.result, name: f.name});
+      const prev = document.getElementById('img-previews');
+      if (prev) prev.innerHTML = renderComposePreviews();
+    };
+    reader.readAsDataURL(f);
+  }
+  input.value='';
+}
+
+function removeComposeImage(i) {
+  S.composeImages.splice(i,1);
+  const prev = document.getElementById('img-previews');
+  if (prev) prev.innerHTML = renderComposePreviews();
+}
+
+function doCreatePost() {
+  const ta = document.getElementById('compose-text');
+  const text = ta ? ta.value.trim() : S.composeText.trim();
+  if (!text) { showToast('投稿本文を入力してください', 'error'); return; }
+  if (text.length > 280) { showToast('投稿本文は280文字以内で入力してください', 'error'); return; }
+  const newPost = {
+    id: uid(), userId: S.user.id,
+    body: text,
+    images: S.composeImages.map(i=>i.url),
+    likedBy: [], comments: 0, ts: Date.now()
+  };
+  S.posts.unshift(newPost);
+  S.composeText = '';
+  S.composeImages = [];
+  showToast('投稿しました！', 'success');
+  navigate('timeline');
+}
+
+function confirmDelete(type, id, extra) {
+  const msg = type==='post' ? 'この投稿を削除しますか？この操作は取り消せません。' : 'このコメントを削除しますか？';
+  showConfirm(msg, ()=>{
+    if (type==='post') doDeletePost(id);
+    else doDeleteComment(id, extra);
+  });
+}
+
+function doDeletePost(id) {
+  const idx = S.posts.findIndex(p=>p.id===id);
+  if (idx===-1) return;
+  if (S.posts[idx].userId !== S.user.id) { showToast('削除権限がありません', 'error'); return; }
+  S.posts.splice(idx,1);
+  showToast('投稿を削除しました', 'info');
+  if (S.page==='post') navigate('timeline');
+  else render();
+}
+
+/* ═══════════════════════════════════════════════════════
+   ACTIONS – LIKES
+═══════════════════════════════════════════════════════ */
+function toggleLike(postId) {
+  if (!S.user) { showToast('いいねするにはログインが必要です', 'error'); return; }
+  const post = getPost(postId);
+  if (!post) { showToast('投稿が見つかりません', 'error'); render(); return; }
+  const idx = post.likedBy.indexOf(S.user.id);
+  if (idx===-1) {
+    post.likedBy.push(S.user.id);
+  } else {
+    post.likedBy.splice(idx,1);
+  }
+  // partial update if possible
+  const btn = document.getElementById(`like-btn-${postId}`);
+  const cnt = document.getElementById(`like-count-${postId}`);
+  const liked = post.likedBy.includes(S.user.id);
+  if (btn && cnt) {
+    btn.className = `action-btn ${liked?'liked':''}`;
+    btn.querySelector('.like-icon').innerHTML = liked?IC.heartFill:IC.heart;
+    cnt.textContent = fmtCount(post.likedBy.length);
+    btn.querySelector('.like-icon').style.animation='none';
+    void btn.querySelector('.like-icon').offsetWidth;
+    if (liked) btn.querySelector('.like-icon').style.animation='heartpop .25s ease';
+  } else { render(); }
+}
+
+/* ═══════════════════════════════════════════════════════
+   ACTIONS – COMMENTS
+═══════════════════════════════════════════════════════ */
+function onCommentInput(el) {
+  const cc=document.getElementById('comment-count');
+  if(cc){ const n=el.value.length; cc.textContent=`${n}/200`; cc.className=`char-count ${n>200?'over':n>180?'warn':''}`; }
+}
+
+function doAddComment(postId) {
+  const ta=document.getElementById('comment-text');
+  if(!ta) return;
+  const text=ta.value.trim();
+  if(!text){showToast('コメントを入力してください','error');return;}
+  if(text.length>200){showToast('コメントは200文字以内で入力してください','error');return;}
+  if(!S.comments[postId]) S.comments[postId]=[];
+  const c={id:ucid(),postId,userId:S.user.id,body:text,ts:Date.now()};
+  S.comments[postId].unshift(c);
+  ta.value='';
+  showToast('コメントを投稿しました','success');
+  render();
+}
+
+function doDeleteComment(commentId, postId) {
+  if(!S.comments[postId]) return;
+  const idx=S.comments[postId].findIndex(c=>c.id===commentId);
+  if(idx===-1) return;
+  if(S.comments[postId][idx].userId!==S.user.id){showToast('削除権限がありません','error');return;}
+  S.comments[postId].splice(idx,1);
+  showToast('コメントを削除しました','info');
+  render();
+}
+
+/* ═══════════════════════════════════════════════════════
+   ACTIONS – FOLLOW
+═══════════════════════════════════════════════════════ */
+function doFollow(targetId) {
+  if(!S.user) return;
+  if(targetId===S.user.id){showToast('自分自身はフォローできません','error');return;}
+  const u=getUser(S.user.id);
+  if(u.followingIds.length>=5000){showToast('フォロー上限（5000）に達しています','error');return;}
+  if(u.followingIds.includes(targetId)){showToast('既にフォロー済みです','info');return;}
+  u.followingIds.push(targetId);
+  const tu=getUser(targetId);
+  showToast(`${tu.name}さんをフォローしました！`,'success');
+  render();
+}
+
+function doUnfollow(targetId) {
+  const u=getUser(S.user.id);
+  const idx=u.followingIds.indexOf(targetId);
+  if(idx===-1) return;
+  const tu=getUser(targetId);
+  showConfirm(`${tu.name}さんのフォローを解除しますか？`,()=>{
+    u.followingIds.splice(idx,1);
+    showToast(`${tu.name}さんのフォローを解除しました`,'info');
+    render();
+  });
+}
+
+/* ═══════════════════════════════════════════════════════
+   ACTIONS – SEARCH / MISC
+═══════════════════════════════════════════════════════ */
+function doEditProfile() {
+  const u = currentUser();
+  const ov = document.getElementById('modal-overlay');
+  const mb = document.getElementById('modal-box');
+  mb.innerHTML = `
+    <h3 style="margin-bottom:18px">プロフィール編集</h3>
+    <div style="margin-bottom:14px">
+      <label style="font-size:.85rem;font-weight:600;display:block;margin-bottom:5px">表示名</label>
+      <input type="text" id="edit-name" value="${esc(u.name)}" maxlength="50"
+        style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;
+               font-size:.92rem;outline:none;font-family:var(--font);transition:border-color .15s"
+        onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'">
+      <div id="edit-name-err" style="color:var(--like);font-size:.78rem;margin-top:4px;display:none"></div>
+    </div>
+    <div style="margin-bottom:18px">
+      <label style="font-size:.85rem;font-weight:600;display:block;margin-bottom:5px">自己紹介</label>
+      <textarea id="edit-bio" maxlength="160" rows="3"
+        style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;
+               font-size:.92rem;resize:none;outline:none;line-height:1.5;font-family:var(--font);transition:border-color .15s"
+        onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'"
+        oninput="document.getElementById('edit-bio-count').textContent=this.value.length+'/160'"
+        >${esc(u.bio||'')}</textarea>
+      <div style="font-size:.78rem;color:var(--text-muted);text-align:right" id="edit-bio-count">${(u.bio||'').length}/160</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">キャンセル</button>
+      <button class="btn btn-primary" onclick="saveProfile()">保存する</button>
+    </div>`;
+  ov.classList.add('open');
+}
+
+function saveProfile() {
+  const nameEl = document.getElementById('edit-name');
+  const bioEl  = document.getElementById('edit-bio');
+  const name = nameEl.value.trim();
+  const bio  = bioEl.value.trim();
+  if (!name) {
+    const err = document.getElementById('edit-name-err');
+    err.textContent = '表示名を入力してください';
+    err.style.display = 'block';
+    nameEl.style.borderColor = 'var(--like)';
+    return;
+  }
+  const u = getUser(S.user.id);
+  u.name = name;
+  u.bio  = bio;
+  S.user = { ...S.user, name, bio };
+  document.getElementById('modal-overlay').classList.remove('open');
+  showToast('プロフィールを更新しました', 'success');
+  render();
+}
+
+function doSearch() {
+  const q   = (document.getElementById('search-q')||{}).value ?? S.params.q ?? '';
+  const err = document.getElementById('search-err');
+  const tab = S.params.searchTab || 'users';
+  // ユーザータブのみ空検索をエラーにする（タグタブは空で全タグ表示）
+  if (tab === 'users' && !q.trim()) {
+    if(err){err.textContent='検索文字列を入力してください';err.style.display='block';}
+    return;
+  }
+  if (q.length > 50) {
+    if(err){err.textContent='50文字以内で入力してください';err.style.display='block';}
+    return;
+  }
+  if(err) err.style.display='none';
+  S.params.q = q;
+  render();
+}
+
+function switchTab(tab) {
+  S.timelineTab=tab;
+  S.loadedCount=8;
+  render();
+}
+
+function loadMore() {
+  S.loadedCount+=8;
+  render();
+}
+
+function scrollToCompose() {
+  navigate('timeline');
+  setTimeout(()=>{ const ta=document.getElementById('compose-text'); if(ta){ta.scrollIntoView({behavior:'smooth',block:'center'});ta.focus();} },100);
+}
+
+/* ═══════════════════════════════════════════════════════
+   TOAST & MODAL
+═══════════════════════════════════════════════════════ */
+function showToast(msg, type='info') {
+  const tc=document.getElementById('toast-container');
+  if(!tc) return;
+  const t=document.createElement('div');
+  t.className=`toast ${type}`;
+  const icons={success:'✓',error:'✕',info:'ℹ'};
+  t.innerHTML=`<span>${icons[type]||'ℹ'}</span><span>${esc(msg)}</span>`;
+  tc.appendChild(t);
+  setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(()=>t.remove(),300);},2800);
+}
+
+function showConfirm(msg, onOk) {
+  const ov=document.getElementById('modal-overlay');
+  const mb=document.getElementById('modal-box');
+  mb.innerHTML=`
+    <h3>確認</h3>
+    <p>${esc(msg)}</p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">キャンセル</button>
+      <button class="btn btn-danger" onclick="modalConfirm()">削除する</button>
+    </div>`;
+  window._modalCallback=onOk;
+  ov.classList.add('open');
+}
+
+function modalConfirm() {
+  const cb = window._modalCallback;
+  window._modalCallback = null;
+  document.getElementById('modal-overlay').classList.remove('open');
+  if(cb) cb();
+}
+
+function closeModal(e) {
+  if(e&&e.target!==document.getElementById('modal-overlay')) return;
+  document.getElementById('modal-overlay').classList.remove('open');
+  window._modalCallback = null;
+}
+
+function openLightbox(e, src) {
+  e.stopPropagation();
+  document.getElementById('lightbox-img').src=src;
+  document.getElementById('lightbox').classList.add('open');
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+}
+
+/* ═══════════════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', ()=>{
+  render();
+});
+
+// keyboard: Escape closes modals
+document.addEventListener('keydown', e=>{
+  if(e.key==='Escape'){
+    document.getElementById('modal-overlay').classList.remove('open');
+    document.getElementById('lightbox').classList.remove('open');
+  }
+});
+</script>
+</body>
+</html>

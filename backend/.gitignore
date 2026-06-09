@@ -1,0 +1,35 @@
+# 機密情報
+/config/master.key
+/config/credentials/production.key
+
+# ログファイル
+/log/*
+!/log/.keep
+
+# 一時ファイル
+/tmp/*
+!/tmp/.keep
+!/tmp/pids
+!/tmp/pids/.keep
+
+# 開発環境 DB
+/db/*.sqlite3
+/db/*.sqlite3-journal
+/db/*.sqlite3-shm
+/db/*.sqlite3-wal
+
+# テスト
+/coverage/
+
+# ノード
+/node_modules
+
+# ビルド成果物
+*.gem
+*.rbc
+/.config
+
+# IDE
+/.idea
+*.swp
+.DS_Store

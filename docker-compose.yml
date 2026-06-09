@@ -1,0 +1,64 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:3001
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3000"
+    volumes:
+      - ./backend:/app
+      - backend_bundle:/usr/local/bundle
+    environment:
+      - DATABASE_URL=mysql2://root:password@db:3306/tripshare_development
+      - RAILS_ENV=development
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_REGION=ap-northeast-1
+      - S3_BUCKET_NAME=tripshare-images-dev
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: mysql:8.0
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_DATABASE=tripshare_development
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  k6:
+    image: grafana/k6:latest
+    volumes:
+      - ./k6:/scripts
+    environment:
+      - K6_OUT=json=/scripts/results.json
+    network_mode: host
+    profiles:
+      - test
+
+volumes:
+  mysql_data:
+  backend_bundle:

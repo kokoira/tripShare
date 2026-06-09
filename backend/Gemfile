@@ -1,0 +1,60 @@
+source 'https://rubygems.org'
+
+ruby '3.3.11'
+
+# Rails 7.2（APIモード）
+gem 'rails', '~> 7.2.0'
+
+# MySQL アダプタ
+gem 'mysql2', '~> 0.5'
+
+# Puma アプリケーションサーバー
+gem 'puma', '>= 5.0'
+
+# タイムゾーン情報
+gem 'tzinfo-data', platforms: %i[windows jruby]
+
+# パフォーマンス最適化
+gem 'bootsnap', require: false
+
+# Rack CORS（クロスオリジンリクエスト許可）
+gem 'rack-cors'
+
+# パスワードハッシュ化
+gem 'bcrypt', '~> 3.1.7'
+
+# 構造化ログ
+gem 'lograge'
+
+# AWS SDK（S3 Presigned URL 生成）
+gem 'aws-sdk-s3', '~> 1'
+
+group :development, :test do
+  # デバッグ
+  gem 'debug', platforms: %i[mri windows], require: 'debug/prelude'
+
+  # セキュリティスキャン
+  gem 'brakeman', require: false
+
+  # コードスタイル
+  gem 'rubocop-rails-omakase', '>= 1.0', require: false
+
+  # テスト
+  gem 'rspec-rails', '~> 7.0'
+  gem 'factory_bot_rails'
+  gem 'faker'
+  gem 'shoulda-matchers', '~> 6.0'
+  gem 'database_cleaner-active_record'
+
+  # プロパティベーステスト
+  gem 'rantly', '~> 2.0'
+end
+
+group :development do
+  gem 'spring'
+end
+
+group :test do
+  # rswag（Swagger ドキュメント自動生成）
+  gem 'rswag-specs'
+end
