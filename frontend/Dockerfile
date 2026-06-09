@@ -1,7 +1,7 @@
-FROM node:20-alpine
+FROM node:22-alpine
 
-# pnpm を corepack で有効化
-RUN corepack enable
+# pnpm を corepack で有効化（バージョン固定）
+RUN corepack enable && corepack prepare pnpm@latest-10 --activate
 
 WORKDIR /app
 
