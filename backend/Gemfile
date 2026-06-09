@@ -29,6 +29,9 @@ gem 'lograge'
 # AWS SDK（S3 Presigned URL 生成）
 gem 'aws-sdk-s3', '~> 1'
 
+# Rails i18n 日本語翻訳
+gem 'rails-i18n', '~> 7.0'
+
 group :development, :test do
   # デバッグ
   gem 'debug', platforms: %i[mri windows], require: 'debug/prelude'
@@ -46,8 +49,9 @@ group :development, :test do
   gem 'shoulda-matchers', '~> 6.0'
   gem 'database_cleaner-active_record'
 
-  # プロパティベーステスト
+  # プロパティベーステスト（rantly/rspec_extensions が require 'rspec' を必要とするため rspec メタ gem も追加）
   gem 'rantly', '~> 2.0'
+  gem 'rspec', '~> 3.0'
 end
 
 group :development do
