@@ -1,6 +1,5 @@
 /**
  * TripShare 共通型定義
- * タスク 1.4 で詳細実装予定
  */
 
 // ユーザー
@@ -42,6 +41,28 @@ export interface Comment {
   created_at: string;
 }
 
+// いいね
+export interface Like {
+  id: number;
+  user_id: number;
+  post_id: number;
+  created_at: string;
+}
+
+// フォロー
+export interface Follow {
+  id: number;
+  follower_id: number;
+  following_id: number;
+  created_at: string;
+}
+
+// 認証レスポンス
+export interface AuthResponse {
+  user: User;
+  message: string;
+}
+
 // APIエラー
 export interface ApiError {
   status: number;
@@ -69,4 +90,25 @@ export interface UserSearchResponse {
     total_pages: number;
     total_count: number;
   };
+}
+
+// Presigned URL レスポンス
+export interface PresignedUrlResponse {
+  presigned_url: string;
+  object_key: string;
+}
+
+// コメント一覧レスポンス
+export interface CommentsResponse {
+  comments: Comment[];
+  pagination: Pagination;
+}
+
+// トースト通知の型
+export type ToastType = 'success' | 'error' | 'info';
+
+export interface Toast {
+  id: string;
+  type: ToastType;
+  message: string;
 }
