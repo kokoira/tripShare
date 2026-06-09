@@ -7,6 +7,9 @@
 backend/config/master.key
 backend/config/credentials/*.key
 
+# Kiro IDE ファイル（ローカル作業用、GitHub には上げない）
+.kiro/
+
 # macOS
 .DS_Store
 
