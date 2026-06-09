@@ -14,6 +14,8 @@ X/Twitter のタイムライン形式を参考にした、テキスト＋画像�
 | 画像投稿 | JPEG/PNG/GIF対応、5MB以下、S3へ直接アップロード |
 | フォロー | ユーザーをフォロー/フォロー解除、タイムラインのフィルタリング |
 | ユーザー検索 | ユーザー名の部分一致検索、プロフィール表示 |
+| プロフィール編集 | 表示名・自己紹介の編集 |
+| ハッシュタグ | 投稿にタグを付け、タグ別一覧で閲覧 |
 
 ## 技術スタック
 
@@ -24,7 +26,9 @@ X/Twitter のタイムライン形式を参考にした、テキスト＋画像�
 | データベース | MySQL | 8.0 |
 | 画像保存 | AWS S3 | - |
 | 実行環境 | Docker Compose | - |
-| 本番インフラ（想定） | EC2 + RDS + ALB + CloudFront | AWS |
+| 本番インフラ（想定） | ECS Fargate + RDS + ALB + S3 + CloudFront | AWS |
+| IaC | Terraform | - |
+| CI/CD | GitHub Actions | - |
 
 ## アーキテクチャ
 
@@ -52,6 +56,7 @@ X/Twitter のタイムライン形式を参考にした、テキスト＋画像�
 ```
 tripShare/
 ├── docker-compose.yml          # Docker Compose設定
+├── .env.example                # 環境変数テンプレート
 ├── frontend/                   # Next.js 15 プロジェクト
 │   ├── Dockerfile
 │   ├── src/
@@ -65,15 +70,17 @@ tripShare/
 │   ├── Dockerfile
 │   ├── app/
 │   │   ├── controllers/api/v1/ # APIコントローラー
-│   │   ├── models/             # ActiveRecordモデル
-│   │   └── services/           # サービスオブジェクト
+│   │   └── models/             # ActiveRecordモデル
 │   ├── db/
 │   │   └── migrate/            # マイグレーションファイル
 │   └── Gemfile
+├── k6/                         # k6 パフォーマンステストスクリプト
 ├── docs/                       # ドキュメント
-│   └── 機能仕様書.md
-├── prototype/                  # HTMLプロトタイプモック
-└── .kiro/specs/travel-sns-app/ # Spec（要件定義・設計・タスク）
+│   ├── requirements.md         # 要件定義書
+│   ├── design.md               # 技術設計書
+│   ├── tasks.md                # 実装タスクリスト
+│   └── feature-spec.md         # 機能仕様書
+└── prototype/                  # HTMLプロトタイプモック
 ```
 
 ## セットアップ手順
@@ -87,12 +94,9 @@ tripShare/
 
 プロジェクトルートに `.env` ファイルを作成:
 
-```env
-# AWS S3設定
-AWS_ACCESS_KEY_ID=your_access_key
-AWS_SECRET_ACCESS_KEY=your_secret_key
-AWS_REGION=ap-northeast-1
-S3_BUCKET_NAME=tripshare-images-dev
+```bash
+cp .env.example .env
+# .env を編集して実際の値を設定する
 ```
 
 ### 起動
@@ -187,31 +191,27 @@ docker compose exec backend rails db:seed
 # バックエンドテスト（RSpec）
 docker compose exec backend bundle exec rspec
 
+# API仕様書生成（rswag）
+docker compose exec backend bundle exec rake rswag:specs:swaggerize
+
 # フロントエンドテスト（Vitest）
 docker compose exec frontend npm run test
 
 # E2Eテスト（Playwright）
-docker compose exec frontend npm run test:e2e
+docker compose exec frontend npx playwright test
+
+# パフォーマンステスト（k6）
+docker compose --profile test run k6 run /scripts/timeline-load.js
 ```
-
-## X/Twitter との違い
-
-| 項目 | X/Twitter | TripShare |
-|------|-----------|-----------|
-| インプレッション数 | 表示あり | 表示なし |
-| リツイート | あり | なし |
-| テーマ | 汎用 | 旅行記録特化 |
-| 投稿文字数 | 280文字 | 280文字 |
-| 画像枚数 | 4枚 | 4枚 |
 
 ## ドキュメント
 
 | ドキュメント | パス | 内容 |
 |-------------|------|------|
-| 機能仕様書 | `docs/機能仕様書.md` | 人間が読みやすい形式の機能仕様 |
-| 要件定義書 | `.kiro/specs/travel-sns-app/requirements.md` | EARS形式の正式要件 |
-| 技術設計書 | `.kiro/specs/travel-sns-app/design.md` | システム設計・ER図・API設計 |
-| タスクリスト | `.kiro/specs/travel-sns-app/tasks.md` | 実装タスク一覧 |
+| 要件定義書 | `docs/requirements.md` | EARS形式の正式要件 |
+| 技術設計書 | `docs/design.md` | システム設計・ER図・API設計 |
+| タスクリスト | `docs/tasks.md` | TDD形式の実装タスク一覧 |
+| 機能仕様書 | `docs/feature-spec.md` | 人間が読みやすい形式の機能仕様 |
 | プロトタイプ | `prototype/index.html` | HTMLモック（ブラウザで直接確認可能） |
 
 ## ライセンス
