@@ -157,6 +157,178 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/ApiError"
+  "/api/v1/posts":
+    get:
+      summary: タイムライン取得（カーソルベースページネーション）
+      tags:
+      - Posts
+      description: 全ユーザーの投稿を新しい順に取得する。カーソルベースのページネーションをサポート。
+      security:
+      - cookieAuth: []
+      parameters:
+      - name: cursor
+        in: query
+        required: false
+        description: ページネーション用カーソル（前のレスポンスのnext_cursorを使用）
+        schema:
+          type: string
+      - name: limit
+        in: query
+        required: false
+        description: '取得件数（デフォルト: 20、最大: 20）'
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: カーソルを使った次ページ取得
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  posts:
+                    type: array
+                    items:
+                      "$ref": "#/components/schemas/Post"
+                  pagination:
+                    type: object
+                    properties:
+                      next_cursor:
+                        type: string
+                        nullable: true
+                      has_more:
+                        type: boolean
+                    required:
+                    - next_cursor
+                    - has_more
+                required:
+                - posts
+                - pagination
+        '401':
+          description: 未認証（セッションなし）
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ApiError"
+    post:
+      summary: 投稿作成
+      tags:
+      - Posts
+      description: 新しい旅行記録を投稿する。1文字以上280文字以内の本文が必要。
+      security:
+      - cookieAuth: []
+      parameters: []
+      responses:
+        '201':
+          description: 最小文字数（1文字）の投稿作成成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  post:
+                    "$ref": "#/components/schemas/Post"
+                required:
+                - post
+        '400':
+          description: 本文が281文字以上（文字数超過）
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ValidationError"
+        '401':
+          description: 未認証（セッションなし）
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ApiError"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                body:
+                  type: string
+                  example: 素晴らしい旅でした！
+              required:
+              - body
+  "/api/v1/posts/{id}":
+    parameters:
+    - name: id
+      in: path
+      description: 投稿ID
+      required: true
+      schema:
+        type: integer
+    get:
+      summary: 投稿詳細取得
+      tags:
+      - Posts
+      description: 指定IDの投稿詳細を取得する
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          description: 投稿詳細取得成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  post:
+                    "$ref": "#/components/schemas/Post"
+                required:
+                - post
+        '404':
+          description: 投稿が存在しない
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ApiError"
+        '401':
+          description: 未認証
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ApiError"
+    delete:
+      summary: 投稿削除（本人のみ）
+      tags:
+      - Posts
+      description: 投稿を削除する。削除できるのは投稿者本人のみ。
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          description: 投稿削除成功（本人）
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                required:
+                - message
+        '403':
+          description: 他ユーザーの投稿を削除しようとした（403 Forbidden）
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ApiError"
+        '401':
+          description: 未認証
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ApiError"
+        '404':
+          description: 投稿が存在しない
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ApiError"
 servers:
 - url: http://{defaultHost}
   variables:
@@ -196,6 +368,20 @@ components:
       - following_count
       - followers_count
       - created_at
+    PostUser:
+      type: object
+      description: 投稿に含まれる投稿者の情報（軽量版）
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        avatar_key:
+          type: string
+          nullable: true
+      required:
+      - id
+      - username
     Post:
       type: object
       properties:
@@ -204,7 +390,7 @@ components:
         body:
           type: string
         user:
-          "$ref": "#/components/schemas/User"
+          "$ref": "#/components/schemas/PostUser"
         comments_count:
           type: integer
         likes_count:
