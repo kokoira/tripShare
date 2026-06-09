@@ -1,6 +1,7 @@
 class User < ApplicationRecord
   # パスワードハッシュ化（bcrypt）
-  has_secure_password
+  # validations: false にして独自バリデーションで128文字まで許可（bcryptの72文字制限を回避）
+  has_secure_password validations: false
 
   # アソシエーション
   has_many :sessions,     dependent: :destroy
@@ -36,6 +37,7 @@ class User < ApplicationRecord
             length:     { maximum: 50 }
 
   validates :password,
+            presence: true,
             length: { minimum: 8, maximum: 128 },
             if:     :password_required?
 

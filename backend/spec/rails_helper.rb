@@ -33,6 +33,8 @@ RSpec.configure do |config|
   config.use_transactional_fixtures = false
 
   config.before(:suite) do
+    # Docker環境では DATABASE_URL が設定されているため、セーフガードを無効化
+    DatabaseCleaner.allow_remote_database_url = true
     DatabaseCleaner.strategy = :transaction
     DatabaseCleaner.clean_with(:truncation)
   end

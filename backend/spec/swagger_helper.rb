@@ -1,12 +1,11 @@
 require 'rails_helper'
+require 'rswag/specs'
 
 RSpec.configure do |config|
   # swagger.yaml の出力先（swagger/ ディレクトリ）
-  # rswag-specs 3.0 では openapi_root= を使用する
   config.openapi_root = Rails.root.join('swagger').to_s
 
   # OpenAPI 3.0 定義
-  # rswag-specs 3.0 では openapi_specs= を使用する
   config.openapi_specs = {
     'v1/swagger.yaml' => {
       openapi: '3.0.1',
@@ -101,6 +100,5 @@ RSpec.configure do |config|
   }
 
   # 出力フォーマットをYAMLに設定
-  # rswag-specs 3.0 では openapi_format= を使用する
   config.openapi_format = :yaml
 end
