@@ -47,12 +47,22 @@ RSpec.configure do |config|
             },
             required: %w[id email username following_count followers_count created_at]
           },
+          PostUser: {
+            type: :object,
+            description: '投稿に含まれる投稿者の情報（軽量版）',
+            properties: {
+              id: { type: :integer },
+              username: { type: :string },
+              avatar_key: { type: :string, nullable: true }
+            },
+            required: %w[id username]
+          },
           Post: {
             type: :object,
             properties: {
               id: { type: :integer },
               body: { type: :string },
-              user: { '$ref' => '#/components/schemas/User' },
+              user: { '$ref' => '#/components/schemas/PostUser' },
               comments_count: { type: :integer },
               likes_count: { type: :integer },
               liked_by_current_user: { type: :boolean },
